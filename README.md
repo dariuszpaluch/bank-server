@@ -12,5 +12,8 @@
 - [Spring](https://spring.io/guides/gs/producing-web-service/)
 - [Maven](https://maven.apache.org/)
 
-2. __UI__
+2. __Database__:
+- [H2](http://www.h2database.com/html/main.html)
+
+3. __UI__
 - [JavaFX](https://docs.oracle.com/javase/8/javafx/get-started-tutorial/jfx-overview.htm#JFXST784)
