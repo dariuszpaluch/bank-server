@@ -59,7 +59,7 @@ public class BankRepository {
   public String createAccount(String token) throws Exception {
 //    String accountNo = String.valueOf(accounts.size() + 1);
 
-    String accountNo = this.bankDAO.createAccound(token);
+    String accountNo = this.bankDAO.createBankAccount(token);
     accounts.put(accountNo, 0.0);
 
     return accountNo;

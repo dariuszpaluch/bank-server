@@ -35,10 +35,33 @@ public class BankDAO {
     }
   }
 
-  public String createAccound(String token) throws Exception {
-    User user = getUserByToken(token);
+  public boolean checkIfAccountNoExistInBank(String accountNo) {
+    PreparedStatement ps = null;
+    try {
+      ps = databaseConnection.prepareStatement("SELECT COUNT(*) FROM ACCOUNT WHERE ACCOUNT_NO IS ?");
+      ps.setString(1, accountNo);
+      ResultSet rs = ps.executeQuery();
+      rs.next();
+      int count=rs.getInt(1);
+      if(count == 0) {
+        return true;
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
 
-    String accountNo = BankAccountUtils.generateIban();
+    return false;
+  }
+
+  public String createBankAccount(String token) throws Exception {
+    User user = getUserByToken(token);
+    String accountNo = null;
+    boolean generatedNewBankAccount = false;
+    while (!generatedNewBankAccount) {
+      accountNo = BankAccountUtils.generateIban();
+      generatedNewBankAccount = checkIfAccountNoExistInBank(accountNo);
+    }
+
     double balance = 0.0;
 
     try {
@@ -58,7 +81,7 @@ public class BankDAO {
 
   public User getUserByToken(String token) throws Exception {
     User user = availableUsers.get(token);
-    if(user == null) {
+    if (user == null) {
       throw new Exception("Wrong authenticate data");
     }
 
@@ -83,22 +106,21 @@ public class BankDAO {
       PreparedStatement ps = this.databaseConnection.prepareStatement("SELECT * FROM USER WHERE LOGIN IS ?");
       ps.setString(1, login);
       ResultSet rs = ps.executeQuery();
-      if(rs.next()) {
+      if (rs.next()) {
         User user = new User(
                 rs.getInt("id"),
                 rs.getString("login"),
                 rs.getString("password")
         );
 
-        if(user.getPassword().equals(password)) {
+        if (user.getPassword().equals(password)) {
           String userToken = user.generateToken();
           availableUsers.put(userToken, user);
           return userToken;
         }
 
         throw new Exception("Wrong authenticate data");
-      }
-      else {
+      } else {
         throw new Exception("Wrong authenticate data");
       }
     } catch (SQLException e) {
