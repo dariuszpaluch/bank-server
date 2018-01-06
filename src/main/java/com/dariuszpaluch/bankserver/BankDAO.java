@@ -1,5 +1,6 @@
 package com.dariuszpaluch.bankserver;
 
+import com.dariuszpaluch.bankserver.models.Account;
 import com.dariuszpaluch.bankserver.models.User;
 import com.dariuszpaluch.bankserver.utils.BankAccountUtils;
 
@@ -42,8 +43,8 @@ public class BankDAO {
       ps.setString(1, accountNo);
       ResultSet rs = ps.executeQuery();
       rs.next();
-      int count=rs.getInt(1);
-      if(count == 0) {
+      int count = rs.getInt(1);
+      if (count == 0) {
         return true;
       }
     } catch (SQLException e) {
@@ -130,8 +131,40 @@ public class BankDAO {
     return null;
   }
 
-  public void depositMoney(String userToken, String accountNo, double amount) {
+  public boolean depositMoney(int userId, String accountNo, double amount) {
+    try {
+      Account account = getAccount(accountNo);
 
+      PreparedStatement ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
+      ps.setDouble(1, account.getBalance() + amount);
+      ps.setString(2, accountNo);
+      if(ps.executeUpdate() > 0) {
+        return true;
+      };
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return false;
   }
 
+  public Account getAccount(String accountNo) {
+    try {
+      PreparedStatement ps = this.databaseConnection.prepareStatement("SELECT * FROM ACCOUNT WHERE ACCOUNT_NO IS ?");
+      ps.setString(1, accountNo);
+      ResultSet rs = ps.executeQuery();
+      if (rs.next()) {
+        Account account = new Account(
+                rs.getString("account_no"),
+                rs.getInt("user_id"),
+                rs.getDouble("balance")
+        );
+        return account;
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return null;
+  }
 }

@@ -1,6 +1,7 @@
 package com.dariuszpaluch.bankserver;
 
 import com.dariuszpaluch.bankserver.exceptions.ServiceFaultException;
+import com.dariuszpaluch.bankserver.models.Account;
 import com.dariuszpaluch.bankserver.models.User;
 import io.spring.guides.gs_producing_web_service.Balance;
 import io.spring.guides.gs_producing_web_service.ServiceFault;
@@ -20,7 +21,7 @@ import java.util.Map;
 public class BankRepository {
   private static final Map<String, Double> accounts = new HashMap<>();
   private BankDAO bankDAO = BankDAO.getInstance();
-
+  private BankVerificationData bankVerification = new BankVerificationData();
   @PostConstruct
   public void initData() {
     accounts.put("1", 100.0);
@@ -41,16 +42,16 @@ public class BankRepository {
   }
 
   public boolean depositMoney(String userToken, String accountNo, double amount) throws ServiceFaultException {
-    try {
-      User user = this.bankDAO.getUserByToken(userToken);
-    } catch (Exception e) {
-      throw new ServiceFaultException(HttpStatus.UNAUTHORIZED, "Wrong token");
-    }
-//    Assert.notNull(userToken, "Header authorization token is Required");
-//    Assert.notNull(accountNo, "The acoount number must not be null");
-//    Assert.isTrue(amount >= 0, "Incorrect amount");
+    User user = bankVerification.verificationUserByToken(userToken);
+    bankVerification.verificationAmount(amount);
+    Account account = bankVerification.verificationIfUserIsOwnerAccountNo(user.getId(), accountNo);
 
-    this.bankDAO.depositMoney(userToken, accountNo, amount);
+
+    boolean result = this.bankDAO.depositMoney(user.getId(), accountNo, amount);
+    if(!result) {
+      throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with deposit money");
+    }
+
     return true;
   }
 
