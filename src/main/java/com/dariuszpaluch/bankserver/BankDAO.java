@@ -82,7 +82,7 @@ public class BankDAO {
   public User getUserByToken(String token) throws Exception {
     User user = availableUsers.get(token);
     if (user == null) {
-      throw new Exception("Wrong authenticate data");
+      throw new Exception("Wrong token");
     }
 
     return user;

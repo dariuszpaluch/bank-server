@@ -1,6 +1,10 @@
 package com.dariuszpaluch.bankserver;
 
+import com.dariuszpaluch.bankserver.exceptions.ServiceFaultException;
+import com.dariuszpaluch.bankserver.models.User;
 import io.spring.guides.gs_producing_web_service.Balance;
+import io.spring.guides.gs_producing_web_service.ServiceFault;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -36,16 +40,22 @@ public class BankRepository {
     return balance;
   }
 
-  public boolean depositMoney(String userToken, String accountNo, double amount) {
-    Assert.notNull(userToken, "Header authorization token is Required");
-    Assert.notNull(accountNo, "The acoount number must not be null");
-    Assert.isTrue(amount >= 0, "Incorrect amount");
+  public boolean depositMoney(String userToken, String accountNo, double amount) throws ServiceFaultException {
+    try {
+      User user = this.bankDAO.getUserByToken(userToken);
+    } catch (Exception e) {
+      throw new ServiceFaultException(HttpStatus.UNAUTHORIZED, "Wrong token");
+    }
+//    Assert.notNull(userToken, "Header authorization token is Required");
+//    Assert.notNull(accountNo, "The acoount number must not be null");
+//    Assert.isTrue(amount >= 0, "Incorrect amount");
 
     this.bankDAO.depositMoney(userToken, accountNo, amount);
     return true;
   }
 
-  public boolean withdrawMoney(String accountNo, double amount) {
+  public boolean withdrawMoney(String userToken, String accountNo, double amount) {
+    Assert.notNull(userToken, "Header authorization token is Required");
     Assert.notNull(accountNo, "The acoount number must not be null");
     Assert.isTrue(amount >= 0, "Incorrect amount");
     Assert.isTrue(accounts.containsKey(accountNo), "The account with this number doesn't exist");
