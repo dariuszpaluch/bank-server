@@ -56,14 +56,16 @@ public class BankRepository {
   }
 
   public boolean withdrawMoney(String userToken, String accountNo, double amount) {
-    Assert.notNull(userToken, "Header authorization token is Required");
-    Assert.notNull(accountNo, "The acoount number must not be null");
-    Assert.isTrue(amount >= 0, "Incorrect amount");
-    Assert.isTrue(accounts.containsKey(accountNo), "The account with this number doesn't exist");
-    Assert.isTrue(accounts.get(accountNo) >= amount, "You don't have enough money in account to withdraw this amount");
+    User user = bankVerification.verificationUserByToken(userToken);
+    bankVerification.verificationAmount(amount);
+    Account account = bankVerification.verificationIfUserIsOwnerAccountNo(user.getId(), accountNo);
+    bankVerification.verificationUserHaveEnoughMoneyInAccount(account, amount);
 
-    double accountAmount = accounts.get(accountNo);
-    accounts.put(accountNo, accountAmount - amount);
+    boolean result = this.bankDAO.withdrawMoney(user.getId(), accountNo, amount);
+    if(!result) {
+      throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with withdraw money");
+    }
+
     return true;
   }
 

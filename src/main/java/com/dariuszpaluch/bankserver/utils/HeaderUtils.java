@@ -1,7 +1,9 @@
 package com.dariuszpaluch.bankserver.utils;
 
+import com.dariuszpaluch.bankserver.exceptions.ServiceFaultException;
 import io.spring.guides.gs_producing_web_service.MyHeaders;
 import io.spring.guides.gs_producing_web_service.ObjectFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.ws.soap.SoapHeaderElement;
 
 import javax.xml.bind.JAXBContext;
@@ -14,7 +16,7 @@ import javax.xml.soap.SOAPHeaderElement;
  * Created by Dariusz Paluch on 06.01.2018.
  */
 public class HeaderUtils {
-  public static String getTokenFromHeader(SoapHeaderElement soapHeaderElement) {
+  public static String getTokenFromHeader(SoapHeaderElement soapHeaderElement) throws ServiceFaultException {
     JAXBContext context = null;
     try {
       context = JAXBContext.newInstance(ObjectFactory.class);
@@ -24,10 +26,9 @@ public class HeaderUtils {
       String token = requestSoapHeaders.getToken();
       return token;
     } catch (JAXBException e) {
-      e.printStackTrace();
+      throw new ServiceFaultException(e, HttpStatus.INTERNAL_SERVER_ERROR, "Some error with get token from headers");
+    } catch(NullPointerException e) {
+      throw new ServiceFaultException(e, HttpStatus.UNAUTHORIZED, "Wrong token");
     }
-
-    return null;
   }
-
 }

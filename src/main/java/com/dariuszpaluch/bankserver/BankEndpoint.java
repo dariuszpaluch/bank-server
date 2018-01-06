@@ -54,7 +54,7 @@ public class BankEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "withdrawMoneyRequest")
   @ResponsePayload
   public WithdrawMoneyResponse withdrawMoney(@RequestPayload WithdrawMoneyRequest request, @SoapHeader(
-          value = "{http://spring.io/guides/gs-producing-web-service}myHeaders") SoapHeaderElement soapHeaderElement) {
+          value = "{http://spring.io/guides/gs-producing-web-service}myHeaders") SoapHeaderElement soapHeaderElement) throws Exception {
     WithdrawMoneyResponse response = new WithdrawMoneyResponse();
     response.setResult(bankRepository.withdrawMoney(HeaderUtils.getTokenFromHeader(soapHeaderElement), request.getAccountNo(), request.getAmount()));
 

@@ -167,4 +167,20 @@ public class BankDAO {
 
     return null;
   }
+
+  public boolean withdrawMoney(int userId, String accountNo, double amount) {
+    try {
+      Account account = getAccount(accountNo);
+      PreparedStatement ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
+      ps.setDouble(1, account.getBalance() - amount);
+      ps.setString(2, accountNo);
+      if(ps.executeUpdate() > 0) {
+        return true;
+      };
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return false;
+  }
 }
