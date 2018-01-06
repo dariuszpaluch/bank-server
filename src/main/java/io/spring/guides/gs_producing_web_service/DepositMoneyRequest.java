@@ -25,7 +25,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="accountNo" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="amount" type="{http://www.w3.org/2001/XMLSchema}double"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -36,36 +37,54 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "name"
+    "accountNo",
+    "amount"
 })
-@XmlRootElement(name = "getCountryRequest")
-public class GetCountryRequest {
+@XmlRootElement(name = "depositMoneyRequest")
+public class DepositMoneyRequest {
 
     @XmlElement(required = true)
-    protected String name;
+    protected String accountNo;
+    protected double amount;
 
     /**
-     * Gets the value of the name property.
+     * Gets the value of the accountNo property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getName() {
-        return name;
+    public String getAccountNo() {
+        return accountNo;
     }
 
     /**
-     * Sets the value of the name property.
+     * Sets the value of the accountNo property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setName(String value) {
-        this.name = value;
+    public void setAccountNo(String value) {
+        this.accountNo = value;
+    }
+
+    /**
+     * Gets the value of the amount property.
+     * 
+     */
+    public double getAmount() {
+        return amount;
+    }
+
+    /**
+     * Sets the value of the amount property.
+     * 
+     */
+    public void setAmount(double value) {
+        this.amount = value;
     }
 
 }

@@ -10,7 +10,6 @@ package io.spring.guides.gs_producing_web_service;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -25,7 +24,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="result" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -36,36 +35,27 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "name"
+    "result"
 })
-@XmlRootElement(name = "getCountryRequest")
-public class GetCountryRequest {
+@XmlRootElement(name = "depositMoneyResponse")
+public class DepositMoneyResponse {
 
-    @XmlElement(required = true)
-    protected String name;
+    protected boolean result;
 
     /**
-     * Gets the value of the name property.
+     * Gets the value of the result property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
      */
-    public String getName() {
-        return name;
+    public boolean isResult() {
+        return result;
     }
 
     /**
-     * Sets the value of the name property.
+     * Sets the value of the result property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
      */
-    public void setName(String value) {
-        this.name = value;
+    public void setResult(boolean value) {
+        this.result = value;
     }
 
 }
