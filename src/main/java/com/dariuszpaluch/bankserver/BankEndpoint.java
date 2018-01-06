@@ -6,6 +6,13 @@ import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
+import org.springframework.ws.soap.SoapHeaderElement;
+import org.springframework.ws.soap.server.endpoint.annotation.SoapHeader;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 
 /**
  * Created by Dariusz Paluch on 06.01.2018.
@@ -32,7 +39,20 @@ public class BankEndpoint {
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "depositMoneyRequest")
   @ResponsePayload
-  public DepositMoneyResponse depositMoney(@RequestPayload DepositMoneyRequest request) {
+  public DepositMoneyResponse depositMoney(@RequestPayload DepositMoneyRequest request, @SoapHeader(
+          value = "{http://spring.io/guides/gs-producing-web-service}myHeaders") SoapHeaderElement soapHeaderElement) {
+    JAXBContext context = null;
+    try {
+      context = JAXBContext.newInstance(ObjectFactory.class);
+      Unmarshaller unmarshaller = context.createUnmarshaller();
+      JAXBElement<MyHeaders> headers = (JAXBElement<MyHeaders>) unmarshaller.unmarshal(soapHeaderElement.getSource());
+      MyHeaders requestSoapHeaders = headers.getValue();
+      String token = requestSoapHeaders.getToken();
+      System.out.println(token);
+    } catch (JAXBException e) {
+      e.printStackTrace();
+    }
+
     DepositMoneyResponse response = new DepositMoneyResponse();
     response.setResult(bankRepository.depositMoney(request.getAccountNo(), request.getAmount()));
 
@@ -53,6 +73,26 @@ public class BankEndpoint {
   public CreateAccountResponse createAccount(@RequestPayload CreateAccountRequest request) {
     CreateAccountResponse response = new CreateAccountResponse();
     response.setAccountNo(bankRepository.createAccount());
+
+    return response;
+  }
+
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "registerUserRequest")
+  @ResponsePayload
+  public RegisterUserResponse registerUser(@RequestPayload RegisterUserRequest request) {
+    RegisterUserResponse response = new RegisterUserResponse();
+    UserAuthenticateData userAuthenticateData = request.getUserAuthenticateData();
+    response.setResult(bankRepository.registerUser(userAuthenticateData.getLogin(), userAuthenticateData.getPassword()));
+
+    return response;
+  }
+
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "authenticateRequest")
+  @ResponsePayload
+  public AuthenticateResponse authenticate(@RequestPayload AuthenticateRequest request) throws Exception {
+    AuthenticateResponse response = new AuthenticateResponse();
+    UserAuthenticateData userAuthenticateData = request.getUserAuthenticateData();
+    response.setToken(bankRepository.authenticate(userAuthenticateData.getLogin(), userAuthenticateData.getPassword()));
 
     return response;
   }

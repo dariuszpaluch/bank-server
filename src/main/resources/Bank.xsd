@@ -2,6 +2,7 @@
            xmlns:tns="http://spring.io/guides/gs-producing-web-service"
            targetNamespace="http://spring.io/guides/gs-producing-web-service"
            elementFormDefault="qualified"
+           xmlns:xsAuth="http://spring.io/guides/gs-producing-web-service"
 >
 
   <xs:element name="getCountryRequest">
@@ -106,5 +107,55 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+
+  <xs:element name="registerUserRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="userAuthenticateData" type="tns:userAuthenticateData"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="registerUserResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="result" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="userAuthenticateData">
+    <xs:sequence>
+      <xs:element name="login" type="xs:string"/>
+      <xs:element name="password" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:element name="authenticateRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="userAuthenticateData" type="tns:userAuthenticateData"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="authenticateResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="token" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+
+  <xs:element name="myHeaders" type="xsAuth:MyHeaders"/>
+
+  <xs:complexType name="MyHeaders">
+    <xs:sequence>
+      <xs:element name="token" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  
 
 </xs:schema>

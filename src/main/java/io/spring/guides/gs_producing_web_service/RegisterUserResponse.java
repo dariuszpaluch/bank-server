@@ -37,8 +37,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "", propOrder = {
     "result"
 })
-@XmlRootElement(name = "withdrawMoneyResponse")
-public class WithdrawMoneyResponse {
+@XmlRootElement(name = "registerUserResponse")
+public class RegisterUserResponse {
 
     protected boolean result;
 

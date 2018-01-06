@@ -15,6 +15,7 @@ import java.util.Map;
 @Component
 public class BankRepository {
   private static final Map<String, Double> accounts = new HashMap<>();
+  private BankDAO bankDAO = BankDAO.getInstance();
 
   @PostConstruct
   public void initData() {
@@ -57,9 +58,27 @@ public class BankRepository {
   }
 
   public String createAccount() {
-    String accountNo = String.valueOf(accounts.size() + 1);
+//    String accountNo = String.valueOf(accounts.size() + 1);
+
+    String accountNo = this.bankDAO.createAccound();
     accounts.put(accountNo, 0.0);
 
     return accountNo;
+  }
+
+  public boolean registerUser(String login, String password) {
+    Assert.notNull(login, "Login is required");
+    Assert.notNull(password, "Password is required");
+
+    this.bankDAO.addUser(login, password);
+
+    return true;
+  }
+
+  public String authenticate(String login, String password) throws Exception {
+    Assert.notNull(login, "Login is required");
+    Assert.notNull(password, "Password is required");
+
+    return this.bankDAO.authenticate(login, password);
   }
 }

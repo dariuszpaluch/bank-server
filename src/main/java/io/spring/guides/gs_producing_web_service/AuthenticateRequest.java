@@ -10,6 +10,7 @@ package io.spring.guides.gs_producing_web_service;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -24,7 +25,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="result" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
+ *         &lt;element name="userAuthenticateData" type="{http://spring.io/guides/gs-producing-web-service}userAuthenticateData"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -35,27 +36,36 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "result"
+    "userAuthenticateData"
 })
-@XmlRootElement(name = "withdrawMoneyResponse")
-public class WithdrawMoneyResponse {
+@XmlRootElement(name = "authenticateRequest")
+public class AuthenticateRequest {
 
-    protected boolean result;
+    @XmlElement(required = true)
+    protected UserAuthenticateData userAuthenticateData;
 
     /**
-     * Gets the value of the result property.
+     * Gets the value of the userAuthenticateData property.
      * 
+     * @return
+     *     possible object is
+     *     {@link UserAuthenticateData }
+     *     
      */
-    public boolean isResult() {
-        return result;
+    public UserAuthenticateData getUserAuthenticateData() {
+        return userAuthenticateData;
     }
 
     /**
-     * Sets the value of the result property.
+     * Sets the value of the userAuthenticateData property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link UserAuthenticateData }
+     *     
      */
-    public void setResult(boolean value) {
-        this.result = value;
+    public void setUserAuthenticateData(UserAuthenticateData value) {
+        this.userAuthenticateData = value;
     }
 
 }
