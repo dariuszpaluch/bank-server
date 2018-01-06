@@ -38,10 +38,21 @@ public class BankRepository {
 
   public boolean depositMoney(String accountNo, double amount) {
     Assert.notNull(accountNo, "The acoount number must not be null");
+    Assert.isTrue(amount >= 0, "Incorrect amount");
     Assert.isTrue(accounts.containsKey(accountNo), "The account with this number doesn't exist");
-
     double accountAmount = accounts.get(accountNo);
     accounts.put(accountNo, accountAmount + amount);
+    return true;
+  }
+
+  public boolean withdrawMoney(String accountNo, double amount) {
+    Assert.notNull(accountNo, "The acoount number must not be null");
+    Assert.isTrue(amount >= 0, "Incorrect amount");
+    Assert.isTrue(accounts.containsKey(accountNo), "The account with this number doesn't exist");
+    Assert.isTrue(accounts.get(accountNo) >= amount, "You don't have enough money in account to withdraw this amount");
+
+    double accountAmount = accounts.get(accountNo);
+    accounts.put(accountNo, accountAmount - amount);
     return true;
   }
 }

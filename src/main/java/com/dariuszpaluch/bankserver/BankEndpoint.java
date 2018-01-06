@@ -1,9 +1,6 @@
 package com.dariuszpaluch.bankserver;
 
-import io.spring.guides.gs_producing_web_service.DepositMoneyRequest;
-import io.spring.guides.gs_producing_web_service.DepositMoneyResponse;
-import io.spring.guides.gs_producing_web_service.GetBalanceRequest;
-import io.spring.guides.gs_producing_web_service.GetBalanceResponse;
+import io.spring.guides.gs_producing_web_service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -38,6 +35,15 @@ public class BankEndpoint {
   public DepositMoneyResponse depositMoney(@RequestPayload DepositMoneyRequest request) {
     DepositMoneyResponse response = new DepositMoneyResponse();
     response.setResult(bankRepository.depositMoney(request.getAccountNo(), request.getAmount()));
+
+    return response;
+  }
+
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "withdrawMoneyRequest")
+  @ResponsePayload
+  public WithdrawMoneyResponse withdrawMoney(@RequestPayload WithdrawMoneyRequest request) {
+    WithdrawMoneyResponse response = new WithdrawMoneyResponse();
+    response.setResult(bankRepository.withdrawMoney(request.getAccountNo(), request.getAmount()));
 
     return response;
   }

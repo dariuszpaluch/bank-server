@@ -59,7 +59,7 @@
       <xs:element name="balance" type="xs:double"/>
     </xs:sequence>
   </xs:complexType>
-  
+
   <xs:element name="depositMoneyRequest">
     <xs:complexType>
       <xs:sequence>
@@ -77,5 +77,21 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="withdrawMoneyRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="accountNo" type="xs:string"/>
+        <xs:element name="amount" type="xs:double"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="withdrawMoneyResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="result" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 
 </xs:schema>
