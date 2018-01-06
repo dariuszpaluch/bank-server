@@ -55,4 +55,11 @@ public class BankRepository {
     accounts.put(accountNo, accountAmount - amount);
     return true;
   }
+
+  public String createAccount() {
+    String accountNo = String.valueOf(accounts.size() + 1);
+    accounts.put(accountNo, 0.0);
+
+    return accountNo;
+  }
 }

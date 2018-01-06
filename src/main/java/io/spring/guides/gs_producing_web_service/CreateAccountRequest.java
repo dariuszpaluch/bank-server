@@ -23,9 +23,6 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;complexType>
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="result" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -34,28 +31,9 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "result"
-})
-@XmlRootElement(name = "withdrawMoneyResponse")
-public class WithdrawMoneyResponse {
+@XmlType(name = "")
+@XmlRootElement(name = "createAccountRequest")
+public class CreateAccountRequest {
 
-    protected boolean result;
-
-    /**
-     * Gets the value of the result property.
-     * 
-     */
-    public boolean isResult() {
-        return result;
-    }
-
-    /**
-     * Sets the value of the result property.
-     * 
-     */
-    public void setResult(boolean value) {
-        this.result = value;
-    }
 
 }

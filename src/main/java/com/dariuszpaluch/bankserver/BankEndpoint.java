@@ -47,4 +47,13 @@ public class BankEndpoint {
 
     return response;
   }
+
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "createAccountRequest")
+  @ResponsePayload
+  public CreateAccountResponse createAccount(@RequestPayload CreateAccountRequest request) {
+    CreateAccountResponse response = new CreateAccountResponse();
+    response.setAccountNo(bankRepository.createAccount());
+
+    return response;
+  }
 }
