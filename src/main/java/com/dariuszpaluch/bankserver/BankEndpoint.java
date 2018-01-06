@@ -1,5 +1,6 @@
 package com.dariuszpaluch.bankserver;
 
+import com.dariuszpaluch.bankserver.utils.HeaderUtils;
 import io.spring.guides.gs_producing_web_service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
@@ -41,20 +42,11 @@ public class BankEndpoint {
   @ResponsePayload
   public DepositMoneyResponse depositMoney(@RequestPayload DepositMoneyRequest request, @SoapHeader(
           value = "{http://spring.io/guides/gs-producing-web-service}myHeaders") SoapHeaderElement soapHeaderElement) {
-    JAXBContext context = null;
-    try {
-      context = JAXBContext.newInstance(ObjectFactory.class);
-      Unmarshaller unmarshaller = context.createUnmarshaller();
-      JAXBElement<MyHeaders> headers = (JAXBElement<MyHeaders>) unmarshaller.unmarshal(soapHeaderElement.getSource());
-      MyHeaders requestSoapHeaders = headers.getValue();
-      String token = requestSoapHeaders.getToken();
-      System.out.println(token);
-    } catch (JAXBException e) {
-      e.printStackTrace();
-    }
+
+    String userToken = HeaderUtils.getTokenFromHeader(soapHeaderElement);
 
     DepositMoneyResponse response = new DepositMoneyResponse();
-    response.setResult(bankRepository.depositMoney(request.getAccountNo(), request.getAmount()));
+    response.setResult(bankRepository.depositMoney(userToken, request.getAccountNo(), request.getAmount()));
 
     return response;
   }
@@ -70,9 +62,10 @@ public class BankEndpoint {
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "createAccountRequest")
   @ResponsePayload
-  public CreateAccountResponse createAccount(@RequestPayload CreateAccountRequest request) {
+  public CreateAccountResponse createAccount(@RequestPayload CreateAccountRequest request, @SoapHeader(
+          value = "{http://spring.io/guides/gs-producing-web-service}myHeaders") SoapHeaderElement soapHeaderElement) throws Exception {
     CreateAccountResponse response = new CreateAccountResponse();
-    response.setAccountNo(bankRepository.createAccount());
+    response.setAccountNo(bankRepository.createAccount(HeaderUtils.getTokenFromHeader(soapHeaderElement)));
 
     return response;
   }

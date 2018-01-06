@@ -29,7 +29,6 @@ public class BankRepository {
     Assert.isTrue(accounts.containsKey(accountNo), "The account with this number doesn't exist");
 
     double balanceValue = accounts.get(accountNo);
-    System.out.println(balanceValue);
 
     Balance balance = new Balance();
     balance.setDate(new Date().toString());
@@ -37,12 +36,12 @@ public class BankRepository {
     return balance;
   }
 
-  public boolean depositMoney(String accountNo, double amount) {
+  public boolean depositMoney(String userToken, String accountNo, double amount) {
+    Assert.notNull(userToken, "Header authorization token is Required");
     Assert.notNull(accountNo, "The acoount number must not be null");
     Assert.isTrue(amount >= 0, "Incorrect amount");
-    Assert.isTrue(accounts.containsKey(accountNo), "The account with this number doesn't exist");
-    double accountAmount = accounts.get(accountNo);
-    accounts.put(accountNo, accountAmount + amount);
+
+    this.bankDAO.depositMoney(userToken, accountNo, amount);
     return true;
   }
 
@@ -57,10 +56,10 @@ public class BankRepository {
     return true;
   }
 
-  public String createAccount() {
+  public String createAccount(String token) throws Exception {
 //    String accountNo = String.valueOf(accounts.size() + 1);
 
-    String accountNo = this.bankDAO.createAccound();
+    String accountNo = this.bankDAO.createAccound(token);
     accounts.put(accountNo, 0.0);
 
     return accountNo;

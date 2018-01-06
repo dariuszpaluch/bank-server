@@ -1,15 +1,17 @@
 package com.dariuszpaluch.bankserver;
 
 import com.dariuszpaluch.bankserver.models.User;
+import com.dariuszpaluch.bankserver.utils.BankAccountUtils;
 
 import javax.validation.constraints.AssertFalse;
 import java.sql.*;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by Dariusz Paluch on 06.01.2018.
  */
 public class BankDAO {
+  private static final Map<String, User> availableUsers = new HashMap<>(); //TODO replace this
   private static BankDAO instance = new BankDAO();
   private Connection databaseConnection = null;
 
@@ -21,8 +23,8 @@ public class BankDAO {
     try {
       Class.forName("org.h2.Driver");
       databaseConnection = DriverManager.getConnection("jdbc:h2:~/test", "sa", "");
-      databaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS ACCOUNT(ACCOUNT_NO VARCHAR PRIMARY KEY, BALANCE DOUBLE)").execute();
-      databaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS USER(ID BIGINT AUTO_INCREMENT, LOGIN VARCHAR, PASSWORD VARCHAR)").execute();
+      databaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS USER(ID INT AUTO_INCREMENT, LOGIN VARCHAR, PASSWORD VARCHAR)").execute();
+      databaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS ACCOUNT(ACCOUNT_NO VARCHAR PRIMARY KEY, USER_ID INT, BALANCE DOUBLE, FOREIGN KEY (USER_ID) REFERENCES USER(ID), )").execute();
       databaseConnection.commit();
 
 
@@ -33,16 +35,17 @@ public class BankDAO {
     }
   }
 
-  public String createAccound() {
-    Random rand = new Random();
-    int value = rand.nextInt(50);
-    String accountNo = String.valueOf(value);
+  public String createAccound(String token) throws Exception {
+    User user = getUserByToken(token);
+
+    String accountNo = BankAccountUtils.generateIban();
     double balance = 0.0;
 
     try {
-      PreparedStatement ps = databaseConnection.prepareStatement("INSERT INTO ACCOUNT(ACCOUNT_NO,BALANCE) VALUES(?,?)");
+      PreparedStatement ps = databaseConnection.prepareStatement("INSERT INTO ACCOUNT(ACCOUNT_NO, USER_ID, BALANCE) VALUES(?,?,?)");
       ps.setString(1, accountNo);
-      ps.setDouble(2, balance);
+      ps.setInt(2, user.getId());
+      ps.setDouble(3, balance);
       ps.execute();
 
       databaseConnection.commit();
@@ -51,6 +54,15 @@ public class BankDAO {
     }
 
     return accountNo;
+  }
+
+  public User getUserByToken(String token) throws Exception {
+    User user = availableUsers.get(token);
+    if(user == null) {
+      throw new Exception("Wrong authenticate data");
+    }
+
+    return user;
   }
 
   public void addUser(String login, String password) {
@@ -72,8 +84,6 @@ public class BankDAO {
       ps.setString(1, login);
       ResultSet rs = ps.executeQuery();
       if(rs.next()) {
-        System.out.println(rs.getString("login"));
-
         User user = new User(
                 rs.getInt("id"),
                 rs.getString("login"),
@@ -81,7 +91,9 @@ public class BankDAO {
         );
 
         if(user.getPassword().equals(password)) {
-          return user.generateToken();
+          String userToken = user.generateToken();
+          availableUsers.put(userToken, user);
+          return userToken;
         }
 
         throw new Exception("Wrong authenticate data");
@@ -95,4 +107,9 @@ public class BankDAO {
 
     return null;
   }
+
+  public void depositMoney(String userToken, String accountNo, double amount) {
+
+  }
+
 }

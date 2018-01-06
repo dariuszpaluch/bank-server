@@ -10,7 +10,7 @@ import java.util.Map;
  * Created by Dariusz Paluch on 06.01.2018.
  */
 public class User {
-  private int Id;
+  private int id;
   private String login;
   private String password;
 
@@ -18,6 +18,7 @@ public class User {
   }
 
   public User(int id, String login, String password) {
+    this.id = id;
     this.login = login;
     this.password = password;
   }
@@ -39,7 +40,7 @@ public class User {
   }
 
   public int getId() {
-    return Id;
+    return id;
   }
 
   public String generateToken() {
