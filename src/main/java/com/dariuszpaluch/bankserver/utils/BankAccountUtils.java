@@ -1,5 +1,6 @@
 package com.dariuszpaluch.bankserver.utils;
 
+import com.dariuszpaluch.bankserver.Settings;
 import org.iban4j.*;
 
 import java.util.ArrayList;
@@ -68,5 +69,10 @@ public class BankAccountUtils {
       return false;
       // invalid
     }
+  }
+
+  public static boolean checkIfAccontHaveMyBankId(String accountNo) {
+    String bankId = accountNo.substring(2,8);
+    return  bankId.equals(Settings.MY_BANK_ID);
   }
 }

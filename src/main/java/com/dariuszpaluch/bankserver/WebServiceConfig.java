@@ -2,6 +2,7 @@ package com.dariuszpaluch.bankserver;
 
 import com.dariuszpaluch.bankserver.exceptions.DetailSoapFaultDefinitionExceptionResolver;
 import com.dariuszpaluch.bankserver.exceptions.ServiceFaultException;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -62,5 +63,12 @@ public class WebServiceConfig extends WsConfigurerAdapter {
   @Bean
   public XsdSchema countriesSchema() {
     return new SimpleXsdSchema(new ClassPathResource("bank.xsd"));
+  }
+
+  @Bean
+  public EmbeddedServletContainerCustomizer containerCustomizer() {
+    return (container -> {
+      container.setPort(8090);
+    });
   }
 }
