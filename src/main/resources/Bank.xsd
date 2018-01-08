@@ -5,6 +5,10 @@
         elementFormDefault="qualified"
         xmlns:xsAuth="http://dariuszpaluch.com/services/bank"
 >
+  <xs:element name="getUserAccountsRequest">
+    <xs:complexType/>
+  </xs:element>
+
   <xs:element name="getUserAccountsResponse">
     <xs:complexType>
       <xs:sequence>
@@ -132,7 +136,7 @@
   </xs:element>
 
 
-  <xs:element name="myHeaders" type="xsAuth:MyHeaders"/>
+  <xs:element name="myHeaders" type="tns:MyHeaders"/>
 
   <xs:complexType name="MyHeaders">
     <xs:sequence>
@@ -140,5 +144,30 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="Transfer">
+    <xs:sequence>
+      <xs:element name="amount" type="xs:int"/>
+      <xs:element name="source_account" type="xs:string"/>
+      <xs:element name="destination_account" type="xs:string"/>
+      <xs:element name="title" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="transferToAnotherBankRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="transfer" type="tns:Transfer"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="transferToAnotherBankResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="result" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 
 </xs:schema>

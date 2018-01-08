@@ -6,6 +6,7 @@ package com.dariuszpaluch.bankserver.models;
 
 public enum BankOperationType {
   WITHDRAW,
-  EXTERNAL_TRANSFER,
+  EXTERNAL_INPUT_TRANSFER,
+  EXTERNAL_OUTPUT_TRANSFER,
   DEPOSIT,
 }

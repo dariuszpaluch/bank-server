@@ -4,8 +4,8 @@ import com.dariuszpaluch.bankserver.BankDAO;
 import com.dariuszpaluch.bankserver.exceptions.AccountNumberDoesNotExist;
 import com.dariuszpaluch.bankserver.exceptions.DatabaseException;
 import com.dariuszpaluch.bankserver.models.ExternalTransferRequest;
-import com.dariuszpaluch.bankserver.models.Transfer;
 import com.dariuszpaluch.bankserver.utils.BankAccountUtils;
+import com.dariuszpaluch.services.bank.Transfer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -37,13 +37,12 @@ public class ExternalTransferController {
     }
 
     //TODO implement save in database
-    Transfer transfer = new Transfer(
-            externalIncomingTransferRequest.getAmount(),
-            externalIncomingTransferRequest.getSource_account(),
-            destinationAccount,
-            externalIncomingTransferRequest.getTitle(),
-            externalIncomingTransferRequest.getName()
-    );
+    Transfer transfer = new Transfer();
+    transfer.setAmount(externalIncomingTransferRequest.getAmount());
+    transfer.setSourceAccount(externalIncomingTransferRequest.getSource_account());
+    transfer.setDestinationAccount(destinationAccount);
+    transfer.setTitle(externalIncomingTransferRequest.getTitle());
+    transfer.setName(externalIncomingTransferRequest.getName());
 
     try {
       this.bankDAO.externalIncomingTransfer(transfer);

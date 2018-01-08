@@ -4,8 +4,8 @@ import com.dariuszpaluch.bankserver.exceptions.AccountNumberDoesNotExist;
 import com.dariuszpaluch.bankserver.exceptions.DatabaseException;
 import com.dariuszpaluch.bankserver.models.*;
 import com.dariuszpaluch.bankserver.utils.BankAccountUtils;
+import com.dariuszpaluch.services.bank.Transfer;
 
-import javax.validation.constraints.AssertFalse;
 import java.sql.*;
 import java.util.*;
 
@@ -179,11 +179,11 @@ public class BankDAO {
 
   public void externalIncomingTransfer(Transfer externalTransfer) throws DatabaseException, AccountNumberDoesNotExist {
     BankOperation bankOperation = new BankOperation(
-            externalTransfer.getSource_account(),
-            externalTransfer.getDestination_account(),
+            externalTransfer.getSourceAccount(),
+            externalTransfer.getDestinationAccount(),
             externalTransfer.getAmount(),
             externalTransfer.getTitle(),
-            BankOperationType.EXTERNAL_TRANSFER
+            BankOperationType.EXTERNAL_INPUT_TRANSFER
     );
     this.updateDestinationAccount(bankOperation);
   }
@@ -254,5 +254,17 @@ public class BankDAO {
     }
 
     return accounts;
+  }
+
+  public void executeTransferToAnotherBank(Transfer transfer) throws DatabaseException, AccountNumberDoesNotExist {
+    BankOperation bankOperation = new BankOperation(
+            transfer.getSourceAccount(),
+            transfer.getDestinationAccount(),
+            transfer.getAmount(),
+            transfer.getTitle(),
+            BankOperationType.EXTERNAL_OUTPUT_TRANSFER
+    );
+
+    this.updateOperationSourceAccount(bankOperation);
   }
 }

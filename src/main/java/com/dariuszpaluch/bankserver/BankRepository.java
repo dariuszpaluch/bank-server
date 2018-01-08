@@ -4,12 +4,16 @@ import com.dariuszpaluch.bankserver.exceptions.AccountNumberDoesNotExist;
 import com.dariuszpaluch.bankserver.exceptions.DatabaseException;
 import com.dariuszpaluch.bankserver.exceptions.ServiceFaultException;
 import com.dariuszpaluch.bankserver.models.Account;
-import com.dariuszpaluch.bankserver.models.Transfer;
+import com.dariuszpaluch.bankserver.models.ExternalTransferRequest;
 import com.dariuszpaluch.bankserver.models.User;
+import com.dariuszpaluch.bankserver.rest.ValidationError;
 import com.dariuszpaluch.services.bank.*;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.Date;
@@ -107,6 +111,30 @@ public class BankRepository {
       return this.bankDAO.getUserAccounts(user);
     } catch (DatabaseException e) {
       throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with get list of accounts");
+    }
+  }
+
+  public void makeTransferToAnotherBank(String userToken, Transfer transfer) {
+    User user = bankVerification.verificationUserByToken(userToken);
+    bankVerification.verificationAmount(transfer.getAmount());
+    Account account = bankVerification.verificationIfUserIsOwnerAccountNo(user.getId(), transfer.getSourceAccount());
+    bankVerification.verificationUserHaveEnoughMoneyInAccount(account, transfer.getAmount());
+
+
+    try {
+      RestTemplateBuilder builder = new RestTemplateBuilder();
+      RestTemplate restTemplate = builder.basicAuthorization("admin","admin").build();
+      ExternalTransferRequest externalTransferRequest = new ExternalTransferRequest();
+//      ResponseEntity<ValidationError> transferFailure = restTemplate.postForEntity("http://localhost:8080/accounts/1234569999", tr , TransferFault.class);
+
+      this.bankDAO.executeTransferToAnotherBank(transfer);
+
+    } catch (DatabaseException e) {
+      e.printStackTrace();
+      throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with withdraw money");
+    } catch (AccountNumberDoesNotExist e) {
+      e.printStackTrace();
+      throw new ServiceFaultException(HttpStatus.NOT_FOUND, "This accounts doesn't exist");
     }
   }
 }
