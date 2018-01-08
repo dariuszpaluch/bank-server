@@ -97,7 +97,7 @@ public class BankSoapEndpoint {
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getUserAccountsRequest")
   @ResponsePayload
-  public GetUserAccountsResponse getUserAccounts(@RequestPayload GetUserAccountsRequest request,  @SoapHeader(
+  public GetUserAccountsResponse getUserAccounts(@SoapHeader(
           value = "{http://spring.io/guides/gs-producing-web-service}myHeaders") SoapHeaderElement soapHeaderElement) throws Exception {
     String userToken = HeaderUtils.getTokenFromHeader(soapHeaderElement);
 

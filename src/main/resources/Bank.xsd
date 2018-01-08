@@ -1,25 +1,14 @@
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:tns="http://spring.io/guides/gs-producing-web-service"
-           targetNamespace="http://spring.io/guides/gs-producing-web-service"
-           elementFormDefault="qualified"
-           xmlns:xsAuth="http://spring.io/guides/gs-producing-web-service"
+<xs:schema
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:tns="http://spring.io/guides/gs-producing-web-service"
+        targetNamespace="http://spring.io/guides/gs-producing-web-service"
+        elementFormDefault="qualified"
+        xmlns:xsAuth="http://spring.io/guides/gs-producing-web-service"
 >
-
-  <xs:element name="getUserAccountsRequest">
-  </xs:element>
-
   <xs:element name="getUserAccountsResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="accounts" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="getCountryRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="name" type="xs:string"/>
+        <xs:element name="accounts" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -116,7 +105,7 @@
       <xs:element name="password" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
-  
+
   <xs:element name="authenticateRequest">
     <xs:complexType>
       <xs:sequence>
@@ -150,7 +139,6 @@
       <xs:element name="token" type="xs:string"/>
     </xs:sequence>
   </xs:complexType>
-  
-  
+
 
 </xs:schema>
