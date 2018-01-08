@@ -1,7 +1,8 @@
 package com.dariuszpaluch.bankserver;
 
 import com.dariuszpaluch.bankserver.utils.HeaderUtils;
-import io.spring.guides.gs_producing_web_service.*;
+
+import com.dariuszpaluch.services.bank.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -10,10 +11,6 @@ import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
 import org.springframework.ws.soap.SoapHeaderElement;
 import org.springframework.ws.soap.server.endpoint.annotation.SoapHeader;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.util.List;
 
 /**
@@ -21,7 +18,7 @@ import java.util.List;
  */
 @Endpoint
 public class BankSoapEndpoint {
-  private static final String NAMESPACE_URI = "http://spring.io/guides/gs-producing-web-service";
+  private static final String NAMESPACE_URI = "http://dariuszpaluch.com/services/bank";
 
   private BankRepository bankRepository;
 

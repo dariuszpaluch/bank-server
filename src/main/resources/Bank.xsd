@@ -1,9 +1,9 @@
 <xs:schema
         xmlns:xs="http://www.w3.org/2001/XMLSchema"
-        xmlns:tns="http://spring.io/guides/gs-producing-web-service"
-        targetNamespace="http://spring.io/guides/gs-producing-web-service"
+        xmlns:tns="http://dariuszpaluch.com/services/bank"
+        targetNamespace="http://dariuszpaluch.com/services/bank"
         elementFormDefault="qualified"
-        xmlns:xsAuth="http://spring.io/guides/gs-producing-web-service"
+        xmlns:xsAuth="http://dariuszpaluch.com/services/bank"
 >
   <xs:element name="getUserAccountsResponse">
     <xs:complexType>

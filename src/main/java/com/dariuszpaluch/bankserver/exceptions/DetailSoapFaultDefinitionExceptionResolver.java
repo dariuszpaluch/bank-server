@@ -1,6 +1,6 @@
 package com.dariuszpaluch.bankserver.exceptions;
 
-import io.spring.guides.gs_producing_web_service.ServiceFault;
+import com.dariuszpaluch.services.bank.*;
 import org.springframework.ws.soap.SoapFault;
 import org.springframework.ws.soap.SoapFaultDetail;
 import org.springframework.ws.soap.server.endpoint.SoapFaultMappingExceptionResolver;

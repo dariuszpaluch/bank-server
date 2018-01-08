@@ -1,8 +1,7 @@
 package com.dariuszpaluch.bankserver.utils;
 
 import com.dariuszpaluch.bankserver.exceptions.ServiceFaultException;
-import io.spring.guides.gs_producing_web_service.MyHeaders;
-import io.spring.guides.gs_producing_web_service.ObjectFactory;
+import com.dariuszpaluch.services.bank.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.ws.soap.SoapHeaderElement;
 

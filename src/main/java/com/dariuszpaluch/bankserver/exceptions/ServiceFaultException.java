@@ -1,6 +1,6 @@
 package com.dariuszpaluch.bankserver.exceptions;
+import com.dariuszpaluch.services.bank.*;
 
-import io.spring.guides.gs_producing_web_service.ServiceFault;
 import org.springframework.http.HttpStatus;
 
 /**
