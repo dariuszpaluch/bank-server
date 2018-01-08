@@ -109,9 +109,9 @@ public class BankSoapEndpoint {
     return response;
   }
 
-  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "externalTransferRequest")
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "transferToAnotherBankRequest")
   @ResponsePayload
-  public TransferToAnotherBankResponse externalTransfer(@RequestPayload TransferToAnotherBankRequest request, @SoapHeader(
+  public TransferToAnotherBankResponse transferToAnotherBank(@RequestPayload TransferToAnotherBankRequest request, @SoapHeader(
           value = "{" + NAMESPACE_URI + "}myHeaders") SoapHeaderElement soapHeaderElement) throws Exception {
     TransferToAnotherBankResponse response = new TransferToAnotherBankResponse();
 
