@@ -1,5 +1,7 @@
 package com.dariuszpaluch.bankserver;
 
+import com.dariuszpaluch.bankserver.exceptions.AccountNumberDoesNotExist;
+import com.dariuszpaluch.bankserver.exceptions.DatabaseException;
 import com.dariuszpaluch.bankserver.exceptions.ServiceFaultException;
 import com.dariuszpaluch.bankserver.models.Account;
 import com.dariuszpaluch.bankserver.models.Transfer;
@@ -13,6 +15,7 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,48 +26,44 @@ public class BankRepository {
   private static final Map<String, Double> accounts = new HashMap<>();
   private BankDAO bankDAO = BankDAO.getInstance();
   private BankVerificationData bankVerification = new BankVerificationData();
-  @PostConstruct
-  public void initData() {
-    accounts.put("1", 100.0);
-    accounts.put("2", 300.0);
-  }
 
+  public Balance getBalance(String userToken, String accountNo) {
+    User user = bankVerification.verificationUserByToken(userToken);
+    Account account = bankVerification.verificationIfUserIsOwnerAccountNo(user.getId(), accountNo);
 
-  public Balance getBalance(String accountNo) {
-    Assert.notNull(accountNo, "The acoount number must not be null");
-    Assert.isTrue(accounts.containsKey(accountNo), "The account with this number doesn't exist");
-
-    double balanceValue = accounts.get(accountNo);
-
+    int balanceValue = account.getBalance();
     Balance balance = new Balance();
     balance.setDate(new Date().toString());
     balance.setBalance(balanceValue);
     return balance;
   }
 
-  public boolean depositMoney(String userToken, String accountNo, double amount) throws ServiceFaultException {
+  public void depositMoney(String userToken, String accountNo, int amount) throws ServiceFaultException {
     User user = bankVerification.verificationUserByToken(userToken);
     bankVerification.verificationAmount(amount);
     Account account = bankVerification.verificationIfUserIsOwnerAccountNo(user.getId(), accountNo);
 
-
-    boolean result = this.bankDAO.depositMoney(user.getId(), accountNo, amount);
-    if(!result) {
+    try {
+     this.bankDAO.depositMoney(user.getId(), accountNo, amount);
+    } catch (DatabaseException e) {
       throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with deposit money");
     }
-
-    return true;
   }
 
-  public boolean withdrawMoney(String userToken, String accountNo, double amount) {
+  public boolean withdrawMoney(String userToken, String accountNo, int amount) {
     User user = bankVerification.verificationUserByToken(userToken);
     bankVerification.verificationAmount(amount);
     Account account = bankVerification.verificationIfUserIsOwnerAccountNo(user.getId(), accountNo);
     bankVerification.verificationUserHaveEnoughMoneyInAccount(account, amount);
 
-    boolean result = this.bankDAO.withdrawMoney(user.getId(), accountNo, amount);
-    if(!result) {
+    try {
+      this.bankDAO.withdrawMoney(accountNo, amount);
+    } catch (DatabaseException e) {
+      e.printStackTrace();
       throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with withdraw money");
+    } catch (AccountNumberDoesNotExist e) {
+      e.printStackTrace();
+      throw new ServiceFaultException(HttpStatus.NOT_FOUND, "This accounts doesn't exist");
     }
 
     return true;
@@ -97,6 +96,16 @@ public class BankRepository {
       return token;
     } catch (Exception e) {
       throw new ServiceFaultException(HttpStatus.UNAUTHORIZED, "Wrong login or password");
+    }
+  }
+
+  public List<String> getUserAccounts(String userToken) {
+    User user = bankVerification.verificationUserByToken(userToken);
+
+    try {
+      return this.bankDAO.getUserAccounts(user);
+    } catch (DatabaseException e) {
+      throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with get list of accounts");
     }
   }
 }

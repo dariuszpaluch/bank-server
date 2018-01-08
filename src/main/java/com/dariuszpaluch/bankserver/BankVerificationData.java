@@ -1,5 +1,6 @@
 package com.dariuszpaluch.bankserver;
 
+import com.dariuszpaluch.bankserver.exceptions.AccountNumberDoesNotExist;
 import com.dariuszpaluch.bankserver.exceptions.ServiceFaultException;
 import com.dariuszpaluch.bankserver.models.Account;
 import com.dariuszpaluch.bankserver.models.User;
@@ -26,18 +27,29 @@ public class BankVerificationData {
     }
   }
 
-  public Account verificationIfUserIsOwnerAccountNo(int id, String accountNo) {
-//    Account account = this.bankDAO.getAccount(accountNo);
-//
-//    if(account.getUserId() != id) {
-//      throw new ServiceFaultException(HttpStatus.BAD_REQUEST, "You don't have account " + accountNo);
-//    }
-//    return  account;
 
-    return null;
+  public void verificationAmount(int amount) throws ServiceFaultException {
+    if(amount <= 0) {
+      throw new ServiceFaultException(HttpStatus.BAD_REQUEST, "Wrong amount");
+    }
   }
 
-  public boolean verificationUserHaveEnoughMoneyInAccount(Account account, double amount) {
+  public Account verificationIfUserIsOwnerAccountNo(int id, String accountNo) {
+    Account account = null;
+    try {
+      account = this.bankDAO.getAccount(accountNo);
+      if(account.getUserId() != id) {
+        throw new ServiceFaultException(HttpStatus.BAD_REQUEST, "You don't have account " + accountNo);
+      }
+    } catch (AccountNumberDoesNotExist accountNumberDoesNotExist) {
+      throw new ServiceFaultException(HttpStatus.NOT_FOUND, "Account number doesn't exist " + accountNo);
+    }
+
+
+    return  account;
+  }
+
+  public boolean verificationUserHaveEnoughMoneyInAccount(Account account, int amount) {
     if(amount > account.getBalance()) {
       throw new ServiceFaultException(HttpStatus.BAD_REQUEST, "You don't enough moeny. Your balance: " + account.getBalance());
     }

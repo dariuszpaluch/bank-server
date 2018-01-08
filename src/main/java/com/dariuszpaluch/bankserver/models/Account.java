@@ -6,12 +6,12 @@ package com.dariuszpaluch.bankserver.models;
 public class Account {
   private String accountNO;
   private int userId;
-  private double balance;
+  private int balance;
 
   public Account() {
   }
 
-  public Account(String accountNO, int userId, double balance) {
+  public Account(String accountNO, int userId, int balance) {
 
     this.accountNO = accountNO;
     this.userId = userId;
@@ -35,11 +35,11 @@ public class Account {
     this.userId = userId;
   }
 
-  public double getBalance() {
+  public int getBalance() {
     return balance;
   }
 
-  public void setBalance(double balance) {
+  public void setBalance(int balance) {
     this.balance = balance;
   }
 }

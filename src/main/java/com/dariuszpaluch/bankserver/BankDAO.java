@@ -133,23 +133,21 @@ public class BankDAO {
     return null;
   }
 
-  public boolean depositMoney(int userId, String accountNo, double amount) {
+  public void depositMoney(int userId, String accountNo, int amount) throws DatabaseException {
     try {
       Account account = getAccount(accountNo);
 
       PreparedStatement ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
       ps.setDouble(1, account.getBalance() + amount);
       ps.setString(2, accountNo);
-      if(ps.executeUpdate() > 0) {
-        return true;
-      };
+      if(ps.executeUpdate() <= 0) {
+        throw new DatabaseException();
+      }
     } catch (SQLException e) {
       e.printStackTrace();
     } catch (AccountNumberDoesNotExist accountNumberDoesNotExist) {
       accountNumberDoesNotExist.printStackTrace();
     }
-
-    return false;
   }
 
   public Account getAccount(String accountNo) throws AccountNumberDoesNotExist {
@@ -161,7 +159,7 @@ public class BankDAO {
         Account account = new Account(
                 rs.getString("account_no"),
                 rs.getInt("user_id"),
-                rs.getDouble("balance")
+                rs.getInt("balance")
         );
         return account;
       } else {
@@ -174,24 +172,18 @@ public class BankDAO {
     return null;
   }
 
-  public boolean withdrawMoney(int userId, String accountNo, double amount) {
-//    try {
-//      Account account = getAccount(accountNo);
-//      PreparedStatement ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
-//      ps.setDouble(1, account.getBalance() - amount);
-//      ps.setString(2, accountNo);
-//      if(ps.executeUpdate() > 0) {
-//        return true;
-//      };
-//    } catch (SQLException e) {
-//      e.printStackTrace();
-//    }
-
-    return false;
+  public void withdrawMoney( String accountNo, int amount) throws DatabaseException, AccountNumberDoesNotExist {
+    BankOperation bankOperation = new BankOperation(
+            null,
+            accountNo,
+            -amount,
+            null,
+            BankOperationType.WITHDRAW
+    );
+    this.updateDestinationAccount(bankOperation);
   }
 
   public void externalIncomingTransfer(Transfer externalTransfer) throws DatabaseException, AccountNumberDoesNotExist {
-    Account account = getAccount(externalTransfer.getDestination_account());
     BankOperation bankOperation = new BankOperation(
             externalTransfer.getSource_account(),
             externalTransfer.getDestination_account(),
@@ -206,8 +198,7 @@ public class BankDAO {
       Account destinationAccount = getAccount(bankOperation.getDestinationAccount());
 
     try {
-      PreparedStatement ps = null;
-      ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
+      PreparedStatement ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
       ps.setDouble(1, destinationAccount.getBalance() + bankOperation.getAmount());
       ps.setString(2, destinationAccount.getAccountNO());
 
@@ -235,5 +226,22 @@ public class BankDAO {
     } catch (SQLException e) {
       e.printStackTrace();
     }
+  }
+
+  public List<String> getUserAccounts(User user) throws DatabaseException {
+    List<String> accounts = new ArrayList<>();
+    try {
+      PreparedStatement ps = this.databaseConnection.prepareStatement("SELECT ACCOUNT_NO FROM ACCOUNT WHERE USER_ID IS ?");
+      ps.setInt(1, user.getId());
+      ResultSet rs = ps.executeQuery();
+      while(rs.next()) {
+        accounts.add(rs.getString("account_no"));
+      }
+
+    } catch (SQLException e) {
+      throw new DatabaseException();
+    }
+
+    return accounts;
   }
 }

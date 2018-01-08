@@ -14,6 +14,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import java.util.List;
 
 /**
  * Created by Dariusz Paluch on 06.01.2018.
@@ -31,9 +32,12 @@ public class BankSoapEndpoint {
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getBalanceRequest")
   @ResponsePayload
-  public GetBalanceResponse getBalance(@RequestPayload GetBalanceRequest request) {
+  public GetBalanceResponse getBalance(@RequestPayload GetBalanceRequest request, @SoapHeader(
+          value = "{http://spring.io/guides/gs-producing-web-service}myHeaders") SoapHeaderElement soapHeaderElement) {
+    String userToken = HeaderUtils.getTokenFromHeader(soapHeaderElement);
+
     GetBalanceResponse response = new GetBalanceResponse();
-    response.setBalance(bankRepository.getBalance(request.getAccountNo()));
+    response.setBalance(bankRepository.getBalance(userToken, request.getAccountNo()));
 
     return response;
   }
@@ -46,8 +50,8 @@ public class BankSoapEndpoint {
     String userToken = HeaderUtils.getTokenFromHeader(soapHeaderElement);
 
     DepositMoneyResponse response = new DepositMoneyResponse();
-    response.setResult(bankRepository.depositMoney(userToken, request.getAccountNo(), request.getAmount()));
-
+    bankRepository.depositMoney(userToken, request.getAccountNo(), request.getAmount());
+    response.setResult(true);
     return response;
   }
 
@@ -87,6 +91,21 @@ public class BankSoapEndpoint {
     AuthenticateResponse response = new AuthenticateResponse();
     UserAuthenticateData userAuthenticateData = request.getUserAuthenticateData();
     response.setToken(bankRepository.authenticate(userAuthenticateData.getLogin(), userAuthenticateData.getPassword()));
+
+    return response;
+  }
+
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getUserAccountsRequest")
+  @ResponsePayload
+  public GetUserAccountsResponse getUserAccounts(@RequestPayload GetUserAccountsRequest request,  @SoapHeader(
+          value = "{http://spring.io/guides/gs-producing-web-service}myHeaders") SoapHeaderElement soapHeaderElement) throws Exception {
+    String userToken = HeaderUtils.getTokenFromHeader(soapHeaderElement);
+
+    GetUserAccountsResponse response = new GetUserAccountsResponse();
+    List<String> accounts = bankRepository.getUserAccounts(userToken);
+    for(String accountNo : accounts) {
+      response.getAccounts().add(accountNo);
+    }
 
     return response;
   }

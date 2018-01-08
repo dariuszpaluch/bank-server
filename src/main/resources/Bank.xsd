@@ -5,6 +5,17 @@
            xmlns:xsAuth="http://spring.io/guides/gs-producing-web-service"
 >
 
+  <xs:element name="getUserAccountsRequest">
+  </xs:element>
+
+  <xs:element name="getUserAccountsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="accounts" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="getCountryRequest">
     <xs:complexType>
       <xs:sequence>
@@ -12,31 +23,6 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-
-  <xs:element name="getCountryResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="country" type="tns:country"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:complexType name="country">
-    <xs:sequence>
-      <xs:element name="name" type="xs:string"/>
-      <xs:element name="population" type="xs:int"/>
-      <xs:element name="capital" type="xs:string"/>
-      <xs:element name="currency" type="tns:currency"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:simpleType name="currency">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="GBP"/>
-      <xs:enumeration value="EUR"/>
-      <xs:enumeration value="PLN"/>
-    </xs:restriction>
-  </xs:simpleType>
 
   <xs:element name="getBalanceRequest">
     <xs:complexType>
@@ -57,7 +43,7 @@
   <xs:complexType name="balance">
     <xs:sequence>
       <xs:element name="date" type="xs:string"/>
-      <xs:element name="balance" type="xs:double"/>
+      <xs:element name="balance" type="xs:int"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -65,7 +51,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="accountNo" type="xs:string"/>
-        <xs:element name="amount" type="xs:double"/>
+        <xs:element name="amount" type="xs:int"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -82,7 +68,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="accountNo" type="xs:string"/>
-        <xs:element name="amount" type="xs:double"/>
+        <xs:element name="amount" type="xs:int"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
