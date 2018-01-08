@@ -44,9 +44,11 @@ public class BankRepository {
     Account account = bankVerification.verificationIfUserIsOwnerAccountNo(user.getId(), accountNo);
 
     try {
-     this.bankDAO.depositMoney(user.getId(), accountNo, amount);
+     this.bankDAO.depositMoney(accountNo, amount);
     } catch (DatabaseException e) {
       throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with deposit money");
+    } catch (AccountNumberDoesNotExist accountNumberDoesNotExist) {
+      throw new ServiceFaultException(HttpStatus.NOT_FOUND, "This accounts doesn't exist");
     }
   }
 

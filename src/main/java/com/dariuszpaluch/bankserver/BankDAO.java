@@ -13,7 +13,7 @@ import java.util.*;
  * Created by Dariusz Paluch on 06.01.2018.
  */
 public class BankDAO {
-  private static final Map<String, User> availableUsers = new HashMap<>(); //TODO replace this
+  private static final Map<String, User> availableUsers = new HashMap<>(); //TODO Add spring authorization by token
   private static BankDAO instance = new BankDAO();
   private Connection databaseConnection = null;
 
@@ -133,21 +133,15 @@ public class BankDAO {
     return null;
   }
 
-  public void depositMoney(int userId, String accountNo, int amount) throws DatabaseException {
-    try {
-      Account account = getAccount(accountNo);
-
-      PreparedStatement ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
-      ps.setDouble(1, account.getBalance() + amount);
-      ps.setString(2, accountNo);
-      if(ps.executeUpdate() <= 0) {
-        throw new DatabaseException();
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-    } catch (AccountNumberDoesNotExist accountNumberDoesNotExist) {
-      accountNumberDoesNotExist.printStackTrace();
-    }
+  public void depositMoney(String accountNo, int amount) throws DatabaseException, AccountNumberDoesNotExist {
+    BankOperation bankOperation = new BankOperation(
+            null,
+            accountNo,
+            amount,
+            null,
+            BankOperationType.DEPOSIT
+    );
+    this.updateDestinationAccount(bankOperation);
   }
 
   public Account getAccount(String accountNo) throws AccountNumberDoesNotExist {
@@ -174,13 +168,13 @@ public class BankDAO {
 
   public void withdrawMoney( String accountNo, int amount) throws DatabaseException, AccountNumberDoesNotExist {
     BankOperation bankOperation = new BankOperation(
-            null,
             accountNo,
-            -amount,
+            null,
+            amount,
             null,
             BankOperationType.WITHDRAW
     );
-    this.updateDestinationAccount(bankOperation);
+    this.updateOperationSourceAccount(bankOperation);
   }
 
   public void externalIncomingTransfer(Transfer externalTransfer) throws DatabaseException, AccountNumberDoesNotExist {
@@ -192,6 +186,23 @@ public class BankDAO {
             BankOperationType.EXTERNAL_TRANSFER
     );
     this.updateDestinationAccount(bankOperation);
+  }
+  public void updateOperationSourceAccount(BankOperation bankOperation) throws AccountNumberDoesNotExist, DatabaseException {
+    Account sourceAccount = getAccount(bankOperation.getSourceAccount());
+
+    try {
+      PreparedStatement ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
+      ps.setDouble(1, sourceAccount.getBalance() - bankOperation.getAmount());
+      ps.setString(2, sourceAccount.getAccountNO());
+
+      if(ps.executeUpdate() <= 0) {
+        throw new DatabaseException();
+      };
+
+      this.addOperationToHistory(bankOperation);
+    } catch (SQLException e) {
+      throw new DatabaseException();
+    }
   }
 
   public void updateDestinationAccount(BankOperation bankOperation) throws AccountNumberDoesNotExist, DatabaseException {
