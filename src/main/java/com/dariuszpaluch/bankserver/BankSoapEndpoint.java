@@ -19,13 +19,13 @@ import javax.xml.bind.Unmarshaller;
  * Created by Dariusz Paluch on 06.01.2018.
  */
 @Endpoint
-public class BankEndpoint {
+public class BankSoapEndpoint {
   private static final String NAMESPACE_URI = "http://spring.io/guides/gs-producing-web-service";
 
   private BankRepository bankRepository;
 
   @Autowired
-  public BankEndpoint(BankRepository bankRepository) {
+  public BankSoapEndpoint(BankRepository bankRepository) {
     this.bankRepository = bankRepository;
   }
 

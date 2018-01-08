@@ -1,4 +1,4 @@
-package com.dariuszpaluch.bankserver;
+package com.dariuszpaluch.bankserver.SpringConfiguration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

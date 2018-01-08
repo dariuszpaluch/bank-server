@@ -1,33 +1,31 @@
-package com.dariuszpaluch.bankserver.rest;
+package com.dariuszpaluch.bankserver.models;
 
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
- * Created by Dariusz Paluch on 06.01.2018.
+ * Created by Dariusz Paluch on 08.01.2018.
  */
 public class Transfer {
-
-  @NotBlank(message = "Transfer amount is required!")
   private Integer amount;
 
-  @NotBlank(message = "Transfer source account is required!")
   private String source_account;
-
-  @NotBlank(message = "Transfer title is required!")
+  private String destination_account;
   private String title;
 
-  @NotBlank(message = "Transfer name is required!")
   private String name;
 
   public Transfer() {
   }
 
-  public Transfer(Integer amount, String source_account, String title, String name, String destination_account) {
+  public Transfer(Integer amount, String source_account, String destination_account, String title, String name) {
     this.amount = amount;
     this.source_account = source_account;
+    this.destination_account = destination_account;
     this.title = title;
     this.name = name;
   }
+
+
 
   public Integer getAmount() {
     return amount;
@@ -43,6 +41,14 @@ public class Transfer {
 
   public void setSource_account(String source_account) {
     this.source_account = source_account;
+  }
+
+  public String getDestination_account() {
+    return destination_account;
+  }
+
+  public void setDestination_account(String destination_account) {
+    this.destination_account = destination_account;
   }
 
   public String getTitle() {
@@ -61,4 +67,3 @@ public class Transfer {
     this.name = name;
   }
 }
-

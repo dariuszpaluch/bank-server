@@ -2,6 +2,7 @@ package com.dariuszpaluch.bankserver;
 
 import com.dariuszpaluch.bankserver.exceptions.ServiceFaultException;
 import com.dariuszpaluch.bankserver.models.Account;
+import com.dariuszpaluch.bankserver.models.Transfer;
 import com.dariuszpaluch.bankserver.models.User;
 import io.spring.guides.gs_producing_web_service.Balance;
 import io.spring.guides.gs_producing_web_service.ServiceFault;

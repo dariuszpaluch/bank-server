@@ -1,4 +1,4 @@
-package com.dariuszpaluch.bankserver;
+package com.dariuszpaluch.bankserver.SpringConfiguration;
 
 import com.dariuszpaluch.bankserver.exceptions.DetailSoapFaultDefinitionExceptionResolver;
 import com.dariuszpaluch.bankserver.exceptions.ServiceFaultException;

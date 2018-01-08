@@ -27,12 +27,14 @@ public class BankVerificationData {
   }
 
   public Account verificationIfUserIsOwnerAccountNo(int id, String accountNo) {
-    Account account = this.bankDAO.getAccount(accountNo);
+//    Account account = this.bankDAO.getAccount(accountNo);
+//
+//    if(account.getUserId() != id) {
+//      throw new ServiceFaultException(HttpStatus.BAD_REQUEST, "You don't have account " + accountNo);
+//    }
+//    return  account;
 
-    if(account.getUserId() != id) {
-      throw new ServiceFaultException(HttpStatus.BAD_REQUEST, "You don't have account " + accountNo);
-    }
-    return  account;
+    return null;
   }
 
   public boolean verificationUserHaveEnoughMoneyInAccount(Account account, double amount) {

@@ -72,7 +72,8 @@ public class BankAccountUtils {
   }
 
   public static boolean checkIfAccontHaveMyBankId(String accountNo) {
-    String bankId = accountNo.substring(2,8);
+    String bankId = accountNo.substring(2,10);
+    System.out.println(bankId);
     return  bankId.equals(Settings.MY_BANK_ID);
   }
 }

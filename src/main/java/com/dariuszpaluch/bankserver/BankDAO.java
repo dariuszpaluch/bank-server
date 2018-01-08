@@ -1,7 +1,8 @@
 package com.dariuszpaluch.bankserver;
 
-import com.dariuszpaluch.bankserver.models.Account;
-import com.dariuszpaluch.bankserver.models.User;
+import com.dariuszpaluch.bankserver.exceptions.AccountNumberDoesNotExist;
+import com.dariuszpaluch.bankserver.exceptions.DatabaseException;
+import com.dariuszpaluch.bankserver.models.*;
 import com.dariuszpaluch.bankserver.utils.BankAccountUtils;
 
 import javax.validation.constraints.AssertFalse;
@@ -26,6 +27,7 @@ public class BankDAO {
       databaseConnection = DriverManager.getConnection("jdbc:h2:~/test", "sa", "");
       databaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS USER(ID INT AUTO_INCREMENT, LOGIN VARCHAR, PASSWORD VARCHAR)").execute();
       databaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS ACCOUNT(ACCOUNT_NO VARCHAR PRIMARY KEY, USER_ID INT, BALANCE DOUBLE, FOREIGN KEY (USER_ID) REFERENCES USER(ID), )").execute();
+      databaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS OPERATION(ID INT AUTO_INCREMENT, SOURCE_ACCOUNT VARCHAR, DESTINATION_ACCOUNT VARCHAR , AMOUNT INT, TITLE VARCHAR , OPERATION_TYPE VARCHAR)").execute();
       databaseConnection.commit();
 
 
@@ -143,12 +145,14 @@ public class BankDAO {
       };
     } catch (SQLException e) {
       e.printStackTrace();
+    } catch (AccountNumberDoesNotExist accountNumberDoesNotExist) {
+      accountNumberDoesNotExist.printStackTrace();
     }
 
     return false;
   }
 
-  public Account getAccount(String accountNo) {
+  public Account getAccount(String accountNo) throws AccountNumberDoesNotExist {
     try {
       PreparedStatement ps = this.databaseConnection.prepareStatement("SELECT * FROM ACCOUNT WHERE ACCOUNT_NO IS ?");
       ps.setString(1, accountNo);
@@ -160,6 +164,8 @@ public class BankDAO {
                 rs.getDouble("balance")
         );
         return account;
+      } else {
+        throw new AccountNumberDoesNotExist();
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -169,18 +175,65 @@ public class BankDAO {
   }
 
   public boolean withdrawMoney(int userId, String accountNo, double amount) {
+//    try {
+//      Account account = getAccount(accountNo);
+//      PreparedStatement ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
+//      ps.setDouble(1, account.getBalance() - amount);
+//      ps.setString(2, accountNo);
+//      if(ps.executeUpdate() > 0) {
+//        return true;
+//      };
+//    } catch (SQLException e) {
+//      e.printStackTrace();
+//    }
+
+    return false;
+  }
+
+  public void externalIncomingTransfer(Transfer externalTransfer) throws DatabaseException, AccountNumberDoesNotExist {
+    Account account = getAccount(externalTransfer.getDestination_account());
+    BankOperation bankOperation = new BankOperation(
+            externalTransfer.getSource_account(),
+            externalTransfer.getDestination_account(),
+            externalTransfer.getAmount(),
+            externalTransfer.getTitle(),
+            BankOperationType.EXTERNAL_TRANSFER
+    );
+    this.updateDestinationAccount(bankOperation);
+  }
+
+  public void updateDestinationAccount(BankOperation bankOperation) throws AccountNumberDoesNotExist, DatabaseException {
+      Account destinationAccount = getAccount(bankOperation.getDestinationAccount());
+
     try {
-      Account account = getAccount(accountNo);
-      PreparedStatement ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
-      ps.setDouble(1, account.getBalance() - amount);
-      ps.setString(2, accountNo);
-      if(ps.executeUpdate() > 0) {
-        return true;
+      PreparedStatement ps = null;
+      ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
+      ps.setDouble(1, destinationAccount.getBalance() + bankOperation.getAmount());
+      ps.setString(2, destinationAccount.getAccountNO());
+
+      if(ps.executeUpdate() <= 0) {
+        throw new DatabaseException();
       };
+
+      this.addOperationToHistory(bankOperation);
+    } catch (SQLException e) {
+      throw new DatabaseException();
+    }
+  }
+
+  public void addOperationToHistory(BankOperation bankOperation) {
+    try {
+      PreparedStatement ps = this.databaseConnection.prepareStatement("INSERT INTO OPERATION(SOURCE_ACCOUNT, DESTINATION_ACCOUNT, AMOUNT, TITLE, OPERATION_TYPE) VALUES(?,?,?,?,?)");
+      ps.setString(1, bankOperation.getSourceAccount());
+      ps.setString(2, bankOperation.getDestinationAccount());
+      ps.setInt(3, bankOperation.getAmount());
+      ps.setString(4, bankOperation.getTitle());
+      ps.setString(5, bankOperation.getType().toString());
+      ps.execute();
+
+      this.databaseConnection.commit();
     } catch (SQLException e) {
       e.printStackTrace();
     }
-
-    return false;
   }
 }
