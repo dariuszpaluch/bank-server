@@ -91,6 +91,11 @@ public class BankRepository {
     Assert.notNull(login, "Login is required");
     Assert.notNull(password, "Password is required");
 
-    return this.bankDAO.authenticate(login, password);
+    try {
+      String token = this.bankDAO.authenticate(login, password);
+      return token;
+    } catch (Exception e) {
+      throw new ServiceFaultException(HttpStatus.UNAUTHORIZED, "Wrong login or password");
+    }
   }
 }
