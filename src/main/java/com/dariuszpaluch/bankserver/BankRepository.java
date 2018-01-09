@@ -3,10 +3,12 @@ package com.dariuszpaluch.bankserver;
 import com.dariuszpaluch.bankserver.exceptions.AccountNumberDoesNotExist;
 import com.dariuszpaluch.bankserver.exceptions.DatabaseException;
 import com.dariuszpaluch.bankserver.exceptions.ServiceFaultException;
+import com.dariuszpaluch.bankserver.exceptions.WrongBankIdInExternalTransfer;
 import com.dariuszpaluch.bankserver.models.Account;
 import com.dariuszpaluch.bankserver.models.ExternalTransferRequest;
 import com.dariuszpaluch.bankserver.models.User;
 import com.dariuszpaluch.bankserver.rest.ValidationError;
+import com.dariuszpaluch.bankserver.utils.BankAccountUtils;
 import com.dariuszpaluch.services.bank.*;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpStatus;
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -109,6 +110,7 @@ public class BankRepository {
 
     try {
       return this.bankDAO.getUserAccounts(user);
+
     } catch (DatabaseException e) {
       throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with get list of accounts");
     }
@@ -122,19 +124,44 @@ public class BankRepository {
 
 
     try {
-      RestTemplateBuilder builder = new RestTemplateBuilder();
-      RestTemplate restTemplate = builder.basicAuthorization("admin","admin").build();
-      ExternalTransferRequest externalTransferRequest = new ExternalTransferRequest();
-//      ResponseEntity<ValidationError> transferFailure = restTemplate.postForEntity("http://localhost:8080/accounts/1234569999", tr , TransferFault.class);
-
-      this.bankDAO.executeTransferToAnotherBank(transfer);
-
+     ResponseEntity<ValidationError> response = this.sendJSONTransferToAnotherBank(transfer);
+      HttpStatus responseStatusCode = response.getStatusCode();
+      switch(responseStatusCode) {
+        case CREATED: {
+          this.bankDAO.executeTransferToAnotherBank(transfer);
+          break;
+        }
+        case BAD_REQUEST: {
+          ValidationError validationError = response.getBody();
+          throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with another Bank. Bank response[ code:" + responseStatusCode.toString() + " error:" + validationError.getError() + " " + "error_field:" + validationError.getError_field());
+        }
+        default: {
+          throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with another Bank. Bank response[ code:" + responseStatusCode.toString());
+        }
+      }
     } catch (DatabaseException e) {
       e.printStackTrace();
       throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with withdraw money");
     } catch (AccountNumberDoesNotExist e) {
       e.printStackTrace();
       throw new ServiceFaultException(HttpStatus.NOT_FOUND, "This accounts doesn't exist");
+    } catch (WrongBankIdInExternalTransfer wrongBankIdInExternalTransfer) {
+      throw new ServiceFaultException(HttpStatus.NOT_FOUND, "Wrong BankId in destination accountNo, I don't have address of this Bank");
     }
+  }
+
+  private ResponseEntity<ValidationError> sendJSONTransferToAnotherBank(Transfer transfer) throws WrongBankIdInExternalTransfer {
+    RestTemplateBuilder builder = new RestTemplateBuilder();
+    RestTemplate restTemplate = builder.basicAuthorization(Settings.EXTERNAL_BANK_AUTHORIZATION_LOGIN, Settings.EXTERNAL_BANK_AUTHORIZATION_PASSWORD).build();
+    ExternalTransferRequest externalTransferRequest = new ExternalTransferRequest();
+    externalTransferRequest.setAmount(transfer.getAmount());
+    externalTransferRequest.setName(transfer.getName());
+    externalTransferRequest.setSource_account(transfer.getSourceAccount());
+    externalTransferRequest.setTitle(transfer.getTitle());
+
+    String destinationBankId = BankAccountUtils.getBankIdFromAccountNo(transfer.getSourceAccount());
+    String bankUrl = Settings.getBankUrl(destinationBankId);
+
+    return restTemplate.postForEntity(bankUrl + "/accounts/" + transfer.getDestinationAccount() + "/history", externalTransferRequest, ValidationError.class);
   }
 }

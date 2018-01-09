@@ -51,7 +51,7 @@ public class ExternalTransferController {
     } catch (AccountNumberDoesNotExist accountNumberDoesNotExist) {
       return ResponseEntity.badRequest().body(new ValidationError("url destinationAccount", "This accountNo doesn't exist in my bank."));
     }
-    return ResponseEntity.status(HttpStatus.OK).build();
+    return ResponseEntity.status(HttpStatus.CREATED).build();
 
   }
 

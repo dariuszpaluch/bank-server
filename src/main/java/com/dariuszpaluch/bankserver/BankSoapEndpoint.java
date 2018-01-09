@@ -1,9 +1,10 @@
 package com.dariuszpaluch.bankserver;
 
-import com.dariuszpaluch.bankserver.models.ExternalTransferRequest;
 import com.dariuszpaluch.bankserver.utils.HeaderUtils;
 
 import com.dariuszpaluch.services.bank.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -19,6 +20,8 @@ import java.util.List;
  */
 @Endpoint
 public class BankSoapEndpoint {
+  private static final Logger LOGGER = LoggerFactory.getLogger(BankSoapEndpoint.class);
+
   private static final String NAMESPACE_URI = "http://dariuszpaluch.com/services/bank";
 
   private BankRepository bankRepository;
@@ -37,6 +40,7 @@ public class BankSoapEndpoint {
     GetBalanceResponse response = new GetBalanceResponse();
     response.setBalance(bankRepository.getBalance(userToken, request.getAccountNo()));
 
+    LOGGER.info("GET_BALANCE: " + request.getAccountNo() + " BALANCE: " + response.getBalance().getBalance());
     return response;
   }
 

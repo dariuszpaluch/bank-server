@@ -70,10 +70,12 @@ public class BankAccountUtils {
       // invalid
     }
   }
+  public static String getBankIdFromAccountNo(String accountNo) {
+    return accountNo.substring(2,10);
+  }
 
   public static boolean checkIfAccontHaveMyBankId(String accountNo) {
-    String bankId = accountNo.substring(2,10);
-    System.out.println(bankId);
+    String bankId = getBankIdFromAccountNo(accountNo);
     return  bankId.equals(Settings.MY_BANK_ID);
   }
 }
