@@ -24,6 +24,7 @@ public class ExternalTransferController {
   @RequestMapping(value = "/{destinationAccount}/history", method = RequestMethod.POST)
   public ResponseEntity transfer(@Valid @RequestBody ExternalTransferRequest externalIncomingTransferRequest, @PathVariable("destinationAccount") String destinationAccount) {
 
+    System.out.println("GET EXTERNAL TRANSFER");
     if (!BankAccountUtils.validateIBAN(destinationAccount)) {
       return ResponseEntity.badRequest().body(new ValidationError("url destinationAccount", "Is not validate IBAN"));
     }

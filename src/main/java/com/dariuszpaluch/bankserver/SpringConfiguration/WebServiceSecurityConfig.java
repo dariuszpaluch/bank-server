@@ -18,11 +18,13 @@ public class WebServiceSecurityConfig extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     http.authorizeRequests().antMatchers("/accounts/**").fullyAuthenticated().and().httpBasic();
     http.csrf().disable();
+    http.headers().frameOptions().disable();
   }
 
   @Autowired
   public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
     auth.inMemoryAuthentication().withUser("admin").password("admin").roles("USER");
+    auth.inMemoryAuthentication().withUser("Admin").password("Admin").roles("USER");
   }
 
 }

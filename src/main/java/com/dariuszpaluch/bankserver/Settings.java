@@ -18,7 +18,7 @@ public class Settings {
   public static String EXTERNAL_BANK_AUTHORIZATION_LOGIN = "admin";
   public static String EXTERNAL_BANK_AUTHORIZATION_PASSWORD = "admin";
   public static String MY_BANK_ID = "00117225";
-  private static String csvFile = "BANKS.csv";
+  private static String csvFile = "banks.csv";
   private static Map<String, String> BANKS = null;
 
 
@@ -57,9 +57,7 @@ public class Settings {
   }
 
   public static String getBankUrl(String bankId) throws WrongBankIdInExternalTransfer {
-    if(BANKS == null) {
-      BANKS = getAddressOfBanks();
-    }
+    BANKS = getAddressOfBanks();
 
     String bankUrl = BANKS.get(bankId);
 
