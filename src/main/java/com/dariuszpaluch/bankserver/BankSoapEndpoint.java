@@ -113,13 +113,13 @@ public class BankSoapEndpoint {
     return response;
   }
 
-  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "transferToAnotherBankRequest")
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "transferRequest")
   @ResponsePayload
-  public TransferToAnotherBankResponse transferToAnotherBank(@RequestPayload TransferToAnotherBankRequest request, @SoapHeader(
+  public TransferResponse transfer(@RequestPayload TransferRequest request, @SoapHeader(
           value = "{" + NAMESPACE_URI + "}myHeaders") SoapHeaderElement soapHeaderElement) throws Exception {
-    TransferToAnotherBankResponse response = new TransferToAnotherBankResponse();
+    TransferResponse response = new TransferResponse();
 
-    bankRepository.makeTransferToAnotherBank(HeaderUtils.getTokenFromHeader(soapHeaderElement), request.getTransfer());
+    bankRepository.makeTransfer(HeaderUtils.getTokenFromHeader(soapHeaderElement), request.getTransfer());
 
     response.setResult(true);
 

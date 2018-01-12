@@ -9,4 +9,5 @@ public enum BankOperationType {
   EXTERNAL_INPUT_TRANSFER,
   EXTERNAL_OUTPUT_TRANSFER,
   DEPOSIT,
+  TRANSFER,
 }

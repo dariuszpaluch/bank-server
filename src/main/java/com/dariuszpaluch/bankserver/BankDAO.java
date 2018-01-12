@@ -6,6 +6,7 @@ import com.dariuszpaluch.bankserver.models.*;
 import com.dariuszpaluch.bankserver.utils.BankAccountUtils;
 import com.dariuszpaluch.services.bank.Transfer;
 
+import javax.wsdl.OperationType;
 import java.sql.*;
 import java.util.*;
 
@@ -223,6 +224,8 @@ public class BankDAO {
     }
   }
 
+
+
   public void addOperationToHistory(BankOperation bankOperation) {
     try {
       PreparedStatement ps = this.databaseConnection.prepareStatement("INSERT INTO OPERATION(SOURCE_ACCOUNT, DESTINATION_ACCOUNT, AMOUNT, TITLE, OPERATION_TYPE) VALUES(?,?,?,?,?)");
@@ -266,5 +269,18 @@ public class BankDAO {
     );
 
     this.updateOperationSourceAccount(bankOperation);
+  }
+
+  public void makeInternalTransfer(Transfer transfer) throws DatabaseException, AccountNumberDoesNotExist {
+    BankOperation bankOperation = new BankOperation(
+            transfer.getSourceAccount(),
+            transfer.getDestinationAccount(),
+            transfer.getAmount(),
+            transfer.getTitle(),
+            BankOperationType.TRANSFER
+    );
+
+    this.updateOperationSourceAccount(bankOperation);
+    this.updateDestinationAccount(bankOperation);
   }
 }

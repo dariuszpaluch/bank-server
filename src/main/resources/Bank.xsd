@@ -154,7 +154,7 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:element name="transferToAnotherBankRequest">
+  <xs:element name="transferRequest">
     <xs:complexType>
       <xs:sequence>
         <xs:element name="transfer" type="tns:Transfer"/>
@@ -162,7 +162,7 @@
     </xs:complexType>
   </xs:element>
 
-  <xs:element name="transferToAnotherBankResponse">
+  <xs:element name="transferResponse">
     <xs:complexType>
       <xs:sequence>
         <xs:element name="result" type="xs:boolean"/>

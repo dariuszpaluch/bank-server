@@ -17,10 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Dariusz Paluch on 06.01.2018.
@@ -112,33 +109,31 @@ public class BankRepository {
       return this.bankDAO.getUserAccounts(user);
 
     } catch (DatabaseException e) {
-      throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with get list of accounts");
+      e.printStackTrace();
+      throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with withdraw money");
     }
   }
 
-  public void makeTransferToAnotherBank(String userToken, Transfer transfer) {
-    User user = bankVerification.verificationUserByToken(userToken);
-    bankVerification.verificationAmount(transfer.getAmount());
-    Account account = bankVerification.verificationIfUserIsOwnerAccountNo(user.getId(), transfer.getSourceAccount());
-    bankVerification.verificationUserHaveEnoughMoneyInAccount(account, transfer.getAmount());
-
-
+  public void makeExternalTransfer(Transfer transfer) {
     try {
-     ResponseEntity<ValidationError> response = this.sendJSONTransferToAnotherBank(transfer);
-      HttpStatus responseStatusCode = response.getStatusCode();
-      switch(responseStatusCode) {
-        case CREATED: {
+
+      ResponseEntity<ValidationError> response = null;
+      response = this.sendJSONTransferToAnotherBank(transfer);
+    HttpStatus responseStatusCode = response.getStatusCode();
+
+    switch(responseStatusCode) {
+      case CREATED: {
           this.bankDAO.executeTransferToAnotherBank(transfer);
-          break;
-        }
-        case BAD_REQUEST: {
-          ValidationError validationError = response.getBody();
-          throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with another Bank. Bank response[ code:" + responseStatusCode.toString() + " error:" + validationError.getError() + " " + "error_field:" + validationError.getError_field());
-        }
-        default: {
-          throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with another Bank. Bank response[ code:" + responseStatusCode.toString());
-        }
+        break;
       }
+      case BAD_REQUEST: {
+        ValidationError validationError = response.getBody();
+        throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with another Bank. Bank response[ code:" + responseStatusCode.toString() + " error:" + validationError.getError() + " " + "error_field:" + validationError.getError_field());
+      }
+      default: {
+        throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with another Bank. Bank response[ code:" + responseStatusCode.toString());
+      }
+    }
     } catch (DatabaseException e) {
       e.printStackTrace();
       throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with withdraw money");
@@ -147,6 +142,30 @@ public class BankRepository {
       throw new ServiceFaultException(HttpStatus.NOT_FOUND, "This accounts doesn't exist");
     } catch (WrongBankIdInExternalTransfer wrongBankIdInExternalTransfer) {
       throw new ServiceFaultException(HttpStatus.NOT_FOUND, "Wrong BankId in destination accountNo, I don't have address of this Bank");
+    }
+  }
+
+  public void makeTransfer(String userToken, Transfer transfer) {
+
+    User user = bankVerification.verificationUserByToken(userToken);
+    bankVerification.verificationAmount(transfer.getAmount());
+    Account account = bankVerification.verificationIfUserIsOwnerAccountNo(user.getId(), transfer.getSourceAccount());
+    String destinationAccount = transfer.getDestinationAccount();
+    bankVerification.verificationUserHaveEnoughMoneyInAccount(account, transfer.getAmount());
+
+    String destinationBankId = BankAccountUtils.getBankIdFromAccountNo(destinationAccount);
+
+    if(destinationBankId.equals(Settings.MY_BANK_ID)) {
+      try {
+        this.bankDAO.makeInternalTransfer(transfer);
+      } catch (DatabaseException e) {
+        throw new ServiceFaultException(HttpStatus.NOT_FOUND, "Some error with database");
+      } catch (AccountNumberDoesNotExist accountNumberDoesNotExist) {
+        throw new ServiceFaultException(HttpStatus.NOT_FOUND, "account number doesn't exist");
+      }
+    }
+    else {
+      this.makeExternalTransfer(transfer);
     }
   }
 
