@@ -1,7 +1,6 @@
 package com.dariuszpaluch.bankserver;
 
-import com.dariuszpaluch.bankserver.exceptions.AccountNumberDoesNotExist;
-import com.dariuszpaluch.bankserver.exceptions.DatabaseException;
+import com.dariuszpaluch.bankserver.exceptions.*;
 import com.dariuszpaluch.bankserver.models.*;
 import com.dariuszpaluch.bankserver.utils.BankAccountUtils;
 import com.dariuszpaluch.services.bank.Transfer;
@@ -83,29 +82,49 @@ public class BankDAO {
     return accountNo;
   }
 
-  public User getUserByToken(String token) throws Exception {
+  public User getUserByToken(String token) throws WrongUserTokenException {
     User user = availableUsers.get(token);
     if (user == null) {
-      throw new Exception("Wrong token");
+      throw new WrongUserTokenException();
     }
 
     return user;
   }
 
-  public void addUser(String login, String password) {
+  public boolean checkIfUserExistWithThisLogin(String login) throws DatabaseException {
     try {
-      PreparedStatement ps = this.databaseConnection.prepareStatement("INSERT INTO USER(LOGIN, PASSWORD) VALUES(?,?)");
+      PreparedStatement ps = this.databaseConnection.prepareStatement("SELECT * FROM USER WHERE LOGIN IS ?");
       ps.setString(1, login);
-      ps.setString(2, password);
-      ps.execute();
+      ResultSet rs = ps.executeQuery();
 
+      if (rs.next()) {
+        return true;
+      }
+
+    } catch (SQLException e) {
+      throw new DatabaseException();
+    }
+
+    return false;
+  }
+
+  public void addUser(String login, String password) throws UserLoginIsBusyException, DatabaseException {
+    try {
+      if (this.checkIfUserExistWithThisLogin(login)) {
+        throw new UserLoginIsBusyException();
+      } else {
+        PreparedStatement ps = this.databaseConnection.prepareStatement("INSERT INTO USER(LOGIN, PASSWORD) VALUES(?,?)");
+        ps.setString(1, login);
+        ps.setString(2, password);
+        ps.execute();
+      }
       this.databaseConnection.commit();
     } catch (SQLException e) {
-      e.printStackTrace();
+      throw new DatabaseException();
     }
   }
 
-  public String authenticate(String login, String password) throws Exception {
+  public String authenticate(String login, String password) throws WrongAuthenticateData, DatabaseException {
     try {
       PreparedStatement ps = this.databaseConnection.prepareStatement("SELECT * FROM USER WHERE LOGIN IS ?");
       ps.setString(1, login);
@@ -123,15 +142,13 @@ public class BankDAO {
           return userToken;
         }
 
-        throw new Exception("Wrong authenticate data");
+        throw new WrongAuthenticateData();
       } else {
-        throw new Exception("Wrong authenticate data");
+        throw new WrongAuthenticateData();
       }
     } catch (SQLException e) {
-      e.printStackTrace();
+      throw new DatabaseException();
     }
-
-    return null;
   }
 
   public void depositMoney(String accountNo, int amount) throws DatabaseException, AccountNumberDoesNotExist {
@@ -167,7 +184,7 @@ public class BankDAO {
     return null;
   }
 
-  public void withdrawMoney( String accountNo, int amount) throws DatabaseException, AccountNumberDoesNotExist {
+  public void withdrawMoney(String accountNo, int amount) throws DatabaseException, AccountNumberDoesNotExist {
     BankOperation bankOperation = new BankOperation(
             accountNo,
             null,
@@ -188,6 +205,7 @@ public class BankDAO {
     );
     this.updateDestinationAccount(bankOperation);
   }
+
   public void updateOperationSourceAccount(BankOperation bankOperation) throws AccountNumberDoesNotExist, DatabaseException {
     Account sourceAccount = getAccount(bankOperation.getSourceAccount());
 
@@ -196,9 +214,10 @@ public class BankDAO {
       ps.setDouble(1, sourceAccount.getBalance() - bankOperation.getAmount());
       ps.setString(2, sourceAccount.getAccountNO());
 
-      if(ps.executeUpdate() <= 0) {
+      if (ps.executeUpdate() <= 0) {
         throw new DatabaseException();
-      };
+      }
+      ;
 
       this.addOperationToHistory(bankOperation);
     } catch (SQLException e) {
@@ -207,23 +226,23 @@ public class BankDAO {
   }
 
   public void updateDestinationAccount(BankOperation bankOperation) throws AccountNumberDoesNotExist, DatabaseException {
-      Account destinationAccount = getAccount(bankOperation.getDestinationAccount());
+    Account destinationAccount = getAccount(bankOperation.getDestinationAccount());
 
     try {
       PreparedStatement ps = this.databaseConnection.prepareStatement("UPDATE ACCOUNT SET BALANCE = ? WHERE ACCOUNT_NO = ?");
       ps.setDouble(1, destinationAccount.getBalance() + bankOperation.getAmount());
       ps.setString(2, destinationAccount.getAccountNO());
 
-      if(ps.executeUpdate() <= 0) {
+      if (ps.executeUpdate() <= 0) {
         throw new DatabaseException();
-      };
+      }
+      ;
 
       this.addOperationToHistory(bankOperation);
     } catch (SQLException e) {
       throw new DatabaseException();
     }
   }
-
 
 
   public void addOperationToHistory(BankOperation bankOperation) {
@@ -248,7 +267,7 @@ public class BankDAO {
       PreparedStatement ps = this.databaseConnection.prepareStatement("SELECT ACCOUNT_NO FROM ACCOUNT WHERE USER_ID IS ?");
       ps.setInt(1, user.getId());
       ResultSet rs = ps.executeQuery();
-      while(rs.next()) {
+      while (rs.next()) {
         accounts.add(rs.getString("account_no"));
       }
 

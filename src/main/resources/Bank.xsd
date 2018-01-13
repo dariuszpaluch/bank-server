@@ -164,9 +164,6 @@
 
   <xs:element name="transferResponse">
     <xs:complexType>
-      <xs:sequence>
-        <xs:element name="result" type="xs:boolean"/>
-      </xs:sequence>
     </xs:complexType>
   </xs:element>
 

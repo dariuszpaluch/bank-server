@@ -1,5 +1,8 @@
 package com.dariuszpaluch.bankserver;
 
+import com.dariuszpaluch.bankserver.exceptions.DatabaseException;
+import com.dariuszpaluch.bankserver.exceptions.UserLoginIsBusyException;
+import com.dariuszpaluch.bankserver.exceptions.WrongUserTokenException;
 import com.dariuszpaluch.bankserver.utils.HeaderUtils;
 
 import com.dariuszpaluch.services.bank.*;
@@ -34,7 +37,7 @@ public class BankSoapEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getBalanceRequest")
   @ResponsePayload
   public GetBalanceResponse getBalance(@RequestPayload GetBalanceRequest request, @SoapHeader(
-          value = "{" + NAMESPACE_URI + "}myHeaders") SoapHeaderElement soapHeaderElement) {
+          value = "{" + NAMESPACE_URI + "}myHeaders") SoapHeaderElement soapHeaderElement) throws WrongUserTokenException {
     String userToken = HeaderUtils.getTokenFromHeader(soapHeaderElement);
 
     GetBalanceResponse response = new GetBalanceResponse();
@@ -47,7 +50,7 @@ public class BankSoapEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "depositMoneyRequest")
   @ResponsePayload
   public DepositMoneyResponse depositMoney(@RequestPayload DepositMoneyRequest request, @SoapHeader(
-          value = "{" + NAMESPACE_URI + "}myHeaders") SoapHeaderElement soapHeaderElement) {
+          value = "{" + NAMESPACE_URI + "}myHeaders") SoapHeaderElement soapHeaderElement) throws WrongUserTokenException {
 
     String userToken = HeaderUtils.getTokenFromHeader(soapHeaderElement);
 
@@ -79,7 +82,7 @@ public class BankSoapEndpoint {
 
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "registerUserRequest")
   @ResponsePayload
-  public RegisterUserResponse registerUser(@RequestPayload RegisterUserRequest request) {
+  public RegisterUserResponse registerUser(@RequestPayload RegisterUserRequest request) throws DatabaseException, UserLoginIsBusyException {
     RegisterUserResponse response = new RegisterUserResponse();
     UserAuthenticateData userAuthenticateData = request.getUserAuthenticateData();
     response.setResult(bankRepository.registerUser(userAuthenticateData.getLogin(), userAuthenticateData.getPassword()));
@@ -113,15 +116,13 @@ public class BankSoapEndpoint {
     return response;
   }
 
-  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "transferRequest")
   @ResponsePayload
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "transferRequest")
   public TransferResponse transfer(@RequestPayload TransferRequest request, @SoapHeader(
           value = "{" + NAMESPACE_URI + "}myHeaders") SoapHeaderElement soapHeaderElement) throws Exception {
+
     TransferResponse response = new TransferResponse();
-
     bankRepository.makeTransfer(HeaderUtils.getTokenFromHeader(soapHeaderElement), request.getTransfer());
-
-    response.setResult(true);
 
     return response;
   }
