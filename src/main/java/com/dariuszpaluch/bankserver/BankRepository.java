@@ -43,49 +43,29 @@ public class BankRepository {
     return null;
   }
 
-  public void depositMoney(String userToken, String accountNo, int amount) throws WrongUserTokenException {
+  public void depositMoney(String userToken, String accountNo, int amount) throws WrongUserTokenException, AccountNumberDoesNotExist, UserIsNotTheOwnerOfThisAccount, IncorrectAmount, DatabaseException {
     User user = BankSoapValidations.validUserToken(userToken);
-//    User user = bankVerification.verificationUserByToken(userToken);
-//    bankVerification.verificationAmount(amount);
-//    Account account = bankVerification.verificationIfUserIsOwnerAccountNo(user.getId(), accountNo);
+    BankSoapValidations.validDepositMoneyRequest(user, accountNo, amount);
 //
-//    try {
-//     this.bankDAO.depositMoney(accountNo, amount);
-//    } catch (DatabaseException e) {
-//      throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with deposit money");
-//    } catch (AccountNumberDoesNotExist accountNumberDoesNotExist) {
-//      throw new ServiceFaultException(HttpStatus.NOT_FOUND, "This accounts doesn't exist");
-//    }
+     this.bankDAO.depositMoney(accountNo, amount);
   }
 
-  public boolean withdrawMoney(String userToken, String accountNo, int amount) {
-//    User user = bankVerification.verificationUserByToken(userToken);
-//
-//    bankVerification.verificationAmount(amount);
-//    bankVerification.verificationIfUserIsOwnerAccountNo(user.getId(), accountNo);
-//    bankVerification.verificationUserHaveEnoughMoneyInAccount(account, amount);
-//
-//    try {
-//      this.bankDAO.withdrawMoney(accountNo, amount);
-//    } catch (DatabaseException e) {
-//      e.printStackTrace();
-//      throw new ServiceFaultException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error with withdraw money");
-//    } catch (AccountNumberDoesNotExist e) {
-//      e.printStackTrace();
-//      throw new ServiceFaultException(HttpStatus.NOT_FOUND, "This accounts doesn't exist");
-//    }
+  public boolean withdrawMoney(String userToken, String accountNo, int amount) throws AccountNumberDoesNotExist, NotEnoughMoneyInAccount, IncorrectAmount, UserIsNotTheOwnerOfThisAccount, WrongUserTokenException, DatabaseException {
 
+    User user = bankVerification.verificationUserByToken(userToken);
+    BankSoapValidations.validWithdrawMoneyRequest(user, accountNo, amount);
+
+    this.bankDAO.withdrawMoney(accountNo, amount);
     return true;
   }
 
-  public String createAccount(String token) throws Exception {
-//    String accountNo = String.valueOf(accounts.size() + 1);
+  public String createAccount(String userToken) throws WrongUserTokenException, DatabaseException {
+    User user = BankSoapValidations.validUserToken(userToken);
+    String accountNo = this.bankDAO.createBankAccount(user);
+    accounts.put(accountNo, 0.0);
 
-//    String accountNo = this.bankDAO.createBankAccount(token);
-//    accounts.put(accountNo, 0.0);
-//
-//    return accountNo;
-    return null;
+
+    return accountNo;
   }
 
   public boolean registerUser(String login, String password) throws DatabaseException, UserLoginIsBusyException {
@@ -181,5 +161,12 @@ public class BankRepository {
 
     System.out.println(bankUrl + "/accounts/" + transfer.getDestinationAccount() + "/history");
     return restTemplate.postForEntity(bankUrl + "/accounts/" + transfer.getDestinationAccount() + "/history", externalTransferRequest, ValidationError.class);
+  }
+
+  public List<OperationHistory> getAccountHistory(String userToken, String accountNo) throws WrongUserTokenException, DatabaseException {
+    User user = BankSoapValidations.validUserToken(userToken);
+    BankSoapValidations.validGetAccountHistoryRequest(user, accountNo);
+
+    return this.bankDAO.getAccountHistory(accountNo);
   }
 }

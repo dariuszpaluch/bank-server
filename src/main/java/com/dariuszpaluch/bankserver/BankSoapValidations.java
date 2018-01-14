@@ -54,4 +54,20 @@ public class BankSoapValidations {
       throw new ServiceFaultException(HttpStatus.BAD_REQUEST, "You don't have enough money on this account.");
     }
   }
+
+  public static void validWithdrawMoneyRequest(User user, String accountNo, int amount) throws IncorrectAmount, UserIsNotTheOwnerOfThisAccount, AccountNumberDoesNotExist, NotEnoughMoneyInAccount {
+    ValidationsUtils.verificationAmount(amount);
+    ValidationsUtils.verificationIfUserIsOwnerAccountNo(user.getId(), accountNo);
+    ValidationsUtils.verificationUserHaveEnoughMoneyInAccount(accountNo, amount);
+  }
+
+  public static void validDepositMoneyRequest(User user, String accountNo, int amount) throws IncorrectAmount, UserIsNotTheOwnerOfThisAccount, AccountNumberDoesNotExist {
+    ValidationsUtils.verificationAmount(amount);
+    ValidationsUtils.verificationIfUserIsOwnerAccountNo(user.getId(), accountNo);
+  }
+
+  public static void validGetAccountHistoryRequest(User user, String accountNo) {
+    Assert.hasText(accountNo, "Account is required");
+    checkIfUserIsOwnerOfAccount(user, accountNo);
+  }
 }

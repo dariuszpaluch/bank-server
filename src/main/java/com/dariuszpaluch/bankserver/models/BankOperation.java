@@ -10,25 +10,19 @@ public class BankOperation {
   private String destinationAccount;
   private int amount;
   private String title;
+  private String name;
   private BankOperationType type;
 
   public BankOperation() {
   }
 
-  //TODO remove
-  public BankOperation(String sourceAccount, String destinationAccount, int amount, String title) {
-    this.sourceAccount = sourceAccount;
-    this.destinationAccount = destinationAccount;
-    this.amount = amount;
-    this.title = title;
-  }
-
-  public BankOperation(String sourceAccount, String destinationAccount, int amount, String title, BankOperationType type) {
+  public BankOperation(String sourceAccount, String destinationAccount, int amount, String title, String name,  BankOperationType type) {
     this.sourceAccount = sourceAccount;
     this.destinationAccount = destinationAccount;
     this.amount = amount;
     this.title = title;
     this.type = type;
+    this.name = name;
   }
 
   public int getId() {
@@ -77,5 +71,13 @@ public class BankOperation {
 
   public void setTitle(String title) {
     this.title = title;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 }

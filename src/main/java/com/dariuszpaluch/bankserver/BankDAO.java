@@ -3,11 +3,15 @@ package com.dariuszpaluch.bankserver;
 import com.dariuszpaluch.bankserver.exceptions.*;
 import com.dariuszpaluch.bankserver.models.*;
 import com.dariuszpaluch.bankserver.utils.BankAccountUtils;
+import com.dariuszpaluch.services.bank.OperationHistory;
 import com.dariuszpaluch.services.bank.Transfer;
 
 import javax.wsdl.OperationType;
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Created by Dariusz Paluch on 06.01.2018.
@@ -27,7 +31,7 @@ public class BankDAO {
       databaseConnection = DriverManager.getConnection("jdbc:h2:~/test", "sa", "");
       databaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS USER(ID INT AUTO_INCREMENT, LOGIN VARCHAR, PASSWORD VARCHAR)").execute();
       databaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS ACCOUNT(ACCOUNT_NO VARCHAR PRIMARY KEY, USER_ID INT, BALANCE DOUBLE, FOREIGN KEY (USER_ID) REFERENCES USER(ID), )").execute();
-      databaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS OPERATION(ID INT AUTO_INCREMENT, SOURCE_ACCOUNT VARCHAR, DESTINATION_ACCOUNT VARCHAR , AMOUNT INT, TITLE VARCHAR , OPERATION_TYPE VARCHAR)").execute();
+      databaseConnection.prepareStatement("CREATE TABLE IF NOT EXISTS OPERATION(ID INT AUTO_INCREMENT, SOURCE_ACCOUNT VARCHAR, DESTINATION_ACCOUNT VARCHAR , AMOUNT INT, TITLE VARCHAR , NAME VARCHAR , OPERATION_TYPE VARCHAR, ACCOUNT_OWNER VARCHAR, BALANCE INT, OPERATION_DATE VARCHAR)").execute();
       databaseConnection.commit();
 
 
@@ -56,8 +60,7 @@ public class BankDAO {
     return false;
   }
 
-  public String createBankAccount(String token) throws Exception {
-    User user = getUserByToken(token);
+  public String createBankAccount(User user) throws DatabaseException {
     String accountNo = null;
     boolean generatedNewBankAccount = false;
     while (!generatedNewBankAccount) {
@@ -76,7 +79,7 @@ public class BankDAO {
 
       databaseConnection.commit();
     } catch (SQLException e) {
-      e.printStackTrace();
+      throw new DatabaseException();
     }
 
     return accountNo;
@@ -157,6 +160,7 @@ public class BankDAO {
             accountNo,
             amount,
             null,
+            null,
             BankOperationType.DEPOSIT
     );
     this.updateDestinationAccount(bankOperation);
@@ -184,15 +188,16 @@ public class BankDAO {
     return null;
   }
 
-  public void withdrawMoney(String accountNo, int amount) throws DatabaseException, AccountNumberDoesNotExist {
+  public void withdrawMoney(String accountNo, int amount) throws AccountNumberDoesNotExist, DatabaseException {
     BankOperation bankOperation = new BankOperation(
             accountNo,
             null,
             amount,
             null,
+            null,
             BankOperationType.WITHDRAW
     );
-    this.updateOperationSourceAccount(bankOperation);
+      this.updateOperationSourceAccount(bankOperation);
   }
 
   public void externalIncomingTransfer(Transfer externalTransfer) throws DatabaseException, AccountNumberDoesNotExist {
@@ -201,6 +206,7 @@ public class BankDAO {
             externalTransfer.getDestinationAccount(),
             externalTransfer.getAmount(),
             externalTransfer.getTitle(),
+            externalTransfer.getName(),
             BankOperationType.EXTERNAL_INPUT_TRANSFER
     );
     this.updateDestinationAccount(bankOperation);
@@ -219,7 +225,7 @@ public class BankDAO {
       }
       ;
 
-      this.addOperationToHistory(bankOperation);
+      this.addOperationToHistory(bankOperation, bankOperation.getSourceAccount());
     } catch (SQLException e) {
       throw new DatabaseException();
     }
@@ -235,24 +241,30 @@ public class BankDAO {
 
       if (ps.executeUpdate() <= 0) {
         throw new DatabaseException();
-      }
-      ;
+      };
 
-      this.addOperationToHistory(bankOperation);
+      this.addOperationToHistory(bankOperation, bankOperation.getDestinationAccount());
     } catch (SQLException e) {
       throw new DatabaseException();
     }
   }
 
 
-  public void addOperationToHistory(BankOperation bankOperation) {
+  public void addOperationToHistory(BankOperation bankOperation, String accountOwner) throws AccountNumberDoesNotExist {
     try {
-      PreparedStatement ps = this.databaseConnection.prepareStatement("INSERT INTO OPERATION(SOURCE_ACCOUNT, DESTINATION_ACCOUNT, AMOUNT, TITLE, OPERATION_TYPE) VALUES(?,?,?,?,?)");
+      int balance  = getAccount(accountOwner).getBalance();
+      PreparedStatement ps = this.databaseConnection.prepareStatement("INSERT INTO OPERATION(SOURCE_ACCOUNT, DESTINATION_ACCOUNT, AMOUNT, TITLE, NAME, OPERATION_TYPE, ACCOUNT_OWNER, BALANCE, OPERATION_DATE) VALUES(?,?,?,?,?,?,?,?,?)");
       ps.setString(1, bankOperation.getSourceAccount());
       ps.setString(2, bankOperation.getDestinationAccount());
       ps.setInt(3, bankOperation.getAmount());
       ps.setString(4, bankOperation.getTitle());
-      ps.setString(5, bankOperation.getType().toString());
+      ps.setString(5, bankOperation.getName());
+      ps.setString(6, bankOperation.getType().toString());
+      ps.setString(7, accountOwner);
+      ps.setInt(8, balance);
+      DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+      Date date = new Date();
+      ps.setString(9, dateFormat.format(date));
       ps.execute();
 
       this.databaseConnection.commit();
@@ -284,6 +296,7 @@ public class BankDAO {
             transfer.getDestinationAccount(),
             transfer.getAmount(),
             transfer.getTitle(),
+            transfer.getName(),
             BankOperationType.EXTERNAL_OUTPUT_TRANSFER
     );
 
@@ -296,10 +309,39 @@ public class BankDAO {
             transfer.getDestinationAccount(),
             transfer.getAmount(),
             transfer.getTitle(),
+            transfer.getName(),
             BankOperationType.TRANSFER
     );
 
     this.updateOperationSourceAccount(bankOperation);
     this.updateDestinationAccount(bankOperation);
+  }
+
+  public List<OperationHistory> getAccountHistory(String accountNo) throws DatabaseException {
+    List<OperationHistory> accountHistory = new ArrayList<>();
+    try {
+      PreparedStatement ps = this.databaseConnection.prepareStatement("SELECT * FROM OPERATION WHERE ACCOUNT_OWNER = ?");
+      ps.setString(1, accountNo);
+      ResultSet rs = ps.executeQuery();
+      while (rs.next()) {
+        OperationHistory operationHistory = new OperationHistory();
+        operationHistory.setId(rs.getInt("id"));
+        operationHistory.setSourceAccount(rs.getString("source_account"));
+        operationHistory.setDestinationAccount(rs.getString("destination_account"));
+        operationHistory.setAmount(rs.getInt("amount"));
+        operationHistory.setTitle(rs.getString("title"));
+        operationHistory.setName(rs.getString("name"));
+        operationHistory.setOperationType(rs.getString("operation_type"));
+        operationHistory.setAccountOwner(rs.getString("account_owner"));
+        operationHistory.setBalance(rs.getInt("balance"));
+        operationHistory.setOperationDate(rs.getString("operation_date"));
+        accountHistory.add(operationHistory);
+      }
+
+    } catch (SQLException e) {
+      throw new DatabaseException();
+    }
+
+    return accountHistory;
   }
 }

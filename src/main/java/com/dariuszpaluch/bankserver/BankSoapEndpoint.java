@@ -1,8 +1,6 @@
 package com.dariuszpaluch.bankserver;
 
-import com.dariuszpaluch.bankserver.exceptions.DatabaseException;
-import com.dariuszpaluch.bankserver.exceptions.UserLoginIsBusyException;
-import com.dariuszpaluch.bankserver.exceptions.WrongUserTokenException;
+import com.dariuszpaluch.bankserver.exceptions.*;
 import com.dariuszpaluch.bankserver.utils.HeaderUtils;
 
 import com.dariuszpaluch.services.bank.*;
@@ -50,7 +48,7 @@ public class BankSoapEndpoint {
   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "depositMoneyRequest")
   @ResponsePayload
   public DepositMoneyResponse depositMoney(@RequestPayload DepositMoneyRequest request, @SoapHeader(
-          value = "{" + NAMESPACE_URI + "}myHeaders") SoapHeaderElement soapHeaderElement) throws WrongUserTokenException {
+          value = "{" + NAMESPACE_URI + "}myHeaders") SoapHeaderElement soapHeaderElement) throws WrongUserTokenException, AccountNumberDoesNotExist, DatabaseException, IncorrectAmount, UserIsNotTheOwnerOfThisAccount {
 
     String userToken = HeaderUtils.getTokenFromHeader(soapHeaderElement);
 
@@ -123,6 +121,21 @@ public class BankSoapEndpoint {
 
     TransferResponse response = new TransferResponse();
     bankRepository.makeTransfer(HeaderUtils.getTokenFromHeader(soapHeaderElement), request.getTransfer());
+
+    return response;
+  }
+
+  @ResponsePayload
+  @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getAccountHistoryRequest")
+  public GetAccountHistoryResponse getAccountHistory(@RequestPayload GetAccountHistoryRequest request, @SoapHeader(
+          value = "{" + NAMESPACE_URI + "}myHeaders") SoapHeaderElement soapHeaderElement) throws Exception {
+
+    GetAccountHistoryResponse response = new GetAccountHistoryResponse();
+    List<OperationHistory> operationHistories = bankRepository.getAccountHistory(HeaderUtils.getTokenFromHeader(soapHeaderElement), request.getAccountNo());
+
+    for (OperationHistory history: operationHistories) {
+      response.getOperations().add(history);
+    }
 
     return response;
   }

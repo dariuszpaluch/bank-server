@@ -167,4 +167,38 @@
     </xs:complexType>
   </xs:element>
 
+
+
+    <xs:complexType name="OperationHistory">
+      <xs:sequence>
+        <xs:element name="id" type="xs:int"/>
+        <xs:element name="source_account" type="xs:string"/>
+        <xs:element name="destination_account" type="xs:string"/>
+        <xs:element name="amount" type="xs:int"/>
+        <xs:element name="title" />
+        <xs:element name="name"/>
+        <xs:element name="operation_type" type="xs:string"/>
+        <xs:element name="account_owner" type="xs:string"/>
+        <xs:element name="balance" type="xs:int"/>
+        <xs:element name="operation_date" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+
+  <xs:element name="getAccountHistoryResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="operations" type="tns:OperationHistory" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="getAccountHistoryRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="accountNo" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+
 </xs:schema>
