@@ -290,7 +290,7 @@ public class BankDAO {
     return accounts;
   }
 
-  public void executeTransferToAnotherBank(Transfer transfer) throws DatabaseException, AccountNumberDoesNotExist {
+  public void afterSuccessExecuteTransferToAnotherBank(Transfer transfer) throws DatabaseException, AccountNumberDoesNotExist {
     BankOperation bankOperation = new BankOperation(
             transfer.getSourceAccount(),
             transfer.getDestinationAccount(),
@@ -316,6 +316,8 @@ public class BankDAO {
     this.updateOperationSourceAccount(bankOperation);
     this.updateDestinationAccount(bankOperation);
   }
+
+
 
   public List<OperationHistory> getAccountHistory(String accountNo) throws DatabaseException {
     List<OperationHistory> accountHistory = new ArrayList<>();

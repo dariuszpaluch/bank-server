@@ -62,7 +62,7 @@ public class Settings {
     String bankUrl = BANKS.get(bankId);
 
 
-    if(bankUrl.isEmpty()) {
+    if(bankUrl == null) {
       throw new WrongBankIdInExternalTransfer();
     }
 

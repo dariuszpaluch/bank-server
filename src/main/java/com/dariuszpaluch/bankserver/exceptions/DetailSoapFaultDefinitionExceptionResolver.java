@@ -19,10 +19,16 @@ public class DetailSoapFaultDefinitionExceptionResolver extends SoapFaultMapping
     logger.warn("Exception processed ", ex);
     if (ex instanceof ServiceFaultException) {
       ServiceFault serviceFault = ((ServiceFaultException) ex).getServiceFault();
-      SoapFaultDetail detail = fault.addFaultDetail();
-      detail.addFaultDetailElement(CODE).addText(serviceFault.getCode());
-      detail.addFaultDetailElement(DESCRIPTION).addText(serviceFault.getDescription());
-    }
+      serviceFault.setCode(serviceFault.getCode());
+      serviceFault.setDescription(serviceFault.getDescription());
+//      SoapFaultDetail detail = fault.addFaultDetail();
+//      detail.addFaultDetailElement(CODE).addText(serviceFault.getCode());
+//      detail.addFaultDetailElement(DESCRIPTION).addText(serviceFault.getDescription());
+
+//      SoapFaultDetail detail = new SoapFaultDetail() {
+
+//      return
+      }
   }
 
 }

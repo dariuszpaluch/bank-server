@@ -12,15 +12,7 @@ import org.springframework.http.HttpStatus;
 public class ValidationsUtils {
   private static BankDAO bankDAO = BankDAO.getInstance();
 
-  public static User verificationUserByToken(String userToken) throws ServiceFaultException, WrongUserTokenException {
-    try {
-      return bankDAO.getUserByToken(userToken);
-    } catch (Exception e) {
-      throw new WrongUserTokenException();
-    }
-  }
-
-  public static void verificationAmount(int amount) throws ServiceFaultException, IncorrectAmount {
+  public static void verificationAmount(int amount) throws IncorrectAmount {
     if(amount <= 0) {
       throw new IncorrectAmount();
     }
@@ -31,6 +23,10 @@ public class ValidationsUtils {
     if(account.getUserId() != id) {
       throw new UserIsNotTheOwnerOfThisAccount();
     }
+  }
+
+  public static void verificationAccountIsExist(String accountNo) throws AccountNumberDoesNotExist {
+    Account account = bankDAO.getAccount(accountNo);
   }
 
   public static  boolean verificationUserHaveEnoughMoneyInAccount(String accountNo, int amount) throws NotEnoughMoneyInAccount, AccountNumberDoesNotExist {

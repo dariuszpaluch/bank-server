@@ -26,21 +26,21 @@ import java.util.Properties;
 @Configuration
 public class WebServiceConfig extends WsConfigurerAdapter {
 
-  @Bean
-  public SoapFaultMappingExceptionResolver exceptionResolver(){
-    SoapFaultMappingExceptionResolver exceptionResolver = new DetailSoapFaultDefinitionExceptionResolver();
-
-    SoapFaultDefinition faultDefinition = new SoapFaultDefinition();
-    faultDefinition.setFaultCode(SoapFaultDefinition.SERVER);
-    exceptionResolver.setDefaultFault(faultDefinition);
-
-    Properties errorMappings = new Properties();
-    errorMappings.setProperty(Exception.class.getName(), SoapFaultDefinition.SERVER.toString());
-    errorMappings.setProperty(ServiceFaultException.class.getName(), SoapFaultDefinition.SERVER.toString());
-    exceptionResolver.setExceptionMappings(errorMappings);
-    exceptionResolver.setOrder(1);
-    return exceptionResolver;
-  }
+//  @Bean
+//  public SoapFaultMappingExceptionResolver exceptionResolver(){
+//    SoapFaultMappingExceptionResolver exceptionResolver = new DetailSoapFaultDefinitionExceptionResolver();
+//
+//    SoapFaultDefinition faultDefinition = new SoapFaultDefinition();
+////    faultDefinition.setFaultCode(SoapFaultDefinition.SERVER);
+//    exceptionResolver.setDefaultFault(faultDefinition);
+//
+//    Properties errorMappings = new Properties();
+////    errorMappings.setProperty(Exception.class.getName(), SoapFaultDefinition.SERVER.toString());
+//    errorMappings.setProperty(ServiceFaultException.class.getName(), SoapFaultDefinition.SERVER.toString());
+//    exceptionResolver.setExceptionMappings(errorMappings);
+//    exceptionResolver.setOrder(1);
+//    return exceptionResolver;
+//  }
 
   @Bean
   public ServletRegistrationBean messageDispatcherServlet(ApplicationContext applicationContext) {
