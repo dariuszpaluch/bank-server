@@ -12,7 +12,7 @@ import java.util.Random;
  */
 public class BankAccountUtils {
   public static String generateIban() {
-    String account = "00117225" + randomBankAccountNumber();
+    String account = Settings.MY_BANK_ID + randomBankAccountNumber();
 
     try {
       String resultAccount = calculateNRBControlSum(account) + account;
