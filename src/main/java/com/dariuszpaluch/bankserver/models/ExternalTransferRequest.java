@@ -9,7 +9,6 @@ import javax.validation.constraints.Min;
  */
 public class ExternalTransferRequest {
 
-  @Min(value = 1, message = "ExternalTransferRequest amount is required!")
   private int amount;
 
   @NotBlank(message = "ExternalTransferRequest source account is required!")
